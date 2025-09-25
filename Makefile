@@ -125,7 +125,7 @@ scripts/synth-compile.tcl: | Bender.lock
 
 scripts/compile_lint.tcl:
 	echo 'set ROOT $(ROOT_DIR)' > $@
-	$(BENDER) script vsim --vlog-arg="$(VLOG_ARGS_LINT)" $(common_defs) $(common_targs) | grep -v "set ROOT" >> $@
+	$(BENDER) script vsim --vlog-arg="$(VLOG_ARGS_LINT)" $(common_defs) $(common_targs) $(synth_targs) $(synth_defs) | grep -v "set ROOT" >> $@
 	echo >> $@
 
 $(library):

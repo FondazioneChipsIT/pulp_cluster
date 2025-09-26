@@ -147,8 +147,8 @@
    // OBI typedefs
    `OBI_TYPEDEF_MINIMAL_A_OPTIONAL(a_optional_t)
    `OBI_TYPEDEF_MINIMAL_R_OPTIONAL(r_optional_t)
-   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, AXI_ADDR_WIDTH, AXI_DATA_WIDTH, 0, a_optional_t)
-   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, 0, r_optional_t)
+   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, AXI_ADDR_WIDTH, AXI_DATA_WIDTH, AXI_ID_WIDTH, a_optional_t)
+   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, AXI_ID_WIDTH, r_optional_t)
    `OBI_TYPEDEF_REQ_T(obi_req_t, obi_a_chan_t)
    `OBI_TYPEDEF_RSP_T(obi_rsp_t, obi_r_chan_t)
 
@@ -422,60 +422,180 @@
        init_req_t init_read_req, init_write_req;
        init_rsp_t init_read_rsp, init_write_rsp;
 
-       idma_backend_r_obi_rw_init_w_axi #(
-         .DataWidth           (AXI_DATA_WIDTH),
-         .AddrWidth           (AXI_ADDR_WIDTH),
-         .UserWidth           (AXI_USER_WIDTH),
-         .AxiIdWidth          (AXI_ID_WIDTH),
-         .NumAxInFlight       (NB_OUTSND_BURSTS),
-         .BufferDepth         (32'd3),
-         .TFLenWidth          (TFLenWidth),
-         .MemSysDepth         (32'd0),
-         .CombinedShifter     (1'b0),
-         .RAWCouplingAvail    (1'b0),
-         .MaskInvalidData     (1'b0),
-         .HardwareLegalizer   (1'b1),
-         .RejectZeroTransfers (1'b1),
-         .idma_req_t          (idma_req_t),
-         .idma_rsp_t          (idma_rsp_t),
-         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
-         .idma_busy_t         (idma_pkg::idma_busy_t),
-         .axi_req_t           (axi_req_t),
-         .axi_rsp_t           (axi_resp_t),
-         .init_req_t          (init_req_t),
-         .init_rsp_t          (init_rsp_t),
-         .obi_req_t           (obi_req_t),
-         .obi_rsp_t           (obi_rsp_t),
-         .read_meta_channel_t (read_meta_channel_t),
-         .write_meta_channel_t(write_meta_channel_t)
-       ) i_idma_backend_r_obi_rw_init_w_axi (
-         .clk_i,
-         .rst_ni,
-         .testmode_i      (test_mode_i),
-         .idma_req_i      (idma_req[s]),
-         .req_valid_i     (be_valid[s]),
-         .req_ready_o     (be_ready[s]),
-         .idma_rsp_o      (idma_rsp[s]),
-         .rsp_valid_o     (be_rsp_valid[s]),
-         .rsp_ready_i     (be_rsp_ready[s]),
-         .idma_eh_req_i   (1'b0),
-         .eh_req_valid_i  (1'b0),
-         .eh_req_ready_o  (  /* NOT CONNECTED */),
-         .init_read_req_o (init_read_req),
-         .init_read_rsp_i (init_read_rsp),
-         .obi_read_req_o  (obi_read_req_from_dma[s/2]),
-         .obi_read_rsp_i  (obi_read_rsp_to_dma[s/2]),
-         .axi_write_req_o (dma_req[s]),
-         .axi_write_rsp_i (dma_rsp[s]),
-         .init_write_req_o(init_write_req),
-         .init_write_rsp_i(init_write_rsp),
-         .busy_o          (idma_busy[s])
-       );
+// #ifdef SYNTHESIS
+      idma_backend_synth_r_obi_rw_init_w_axi #(
+        .DataWidth          ( AXI_DATA_WIDTH   ),
+        .AddrWidth           ( AXI_ADDR_WIDTH   ),
+        .UserWidth           ( AXI_USER_WIDTH   ),
+        .AxiIdWidth          ( AXI_ID_WIDTH     ),
+        .NumAxInFlight       ( NB_OUTSND_BURSTS ),
+        .BufferDepth         ( 32'd3            ),
+        .TFLenWidth          ( TFLenWidth       ),
+        .MemSysDepth         ( 32'd0            ),
+        .CombinedShifter     ( 1'b0             ),
+        .RAWCouplingAvail    ( 1'b0             ),
+        .MaskInvalidData     ( 1'b0             ),
+        .HardwareLegalizer   ( 1'b1             ),
+        .RejectZeroTransfers ( 1'b1             ),
+        .ErrorHandling       ( 1'b0             )
+      ) i_idma_backend_r_obi_rw_init_w_axi (
+        .clk_i              ( clk_i                                   ),
+        .rst_ni             ( rst_ni                                  ),
+        .test_i             ( test_mode_i                             ),
+        .req_valid_i        ( be_valid[s]                             ),
+        .req_ready_o        ( be_ready[s]                             ),
+        .req_length_i       ( idma_req[s].length                      ),
+        .req_src_addr_i     ( idma_req[s].src_addr                    ),
+        .req_dst_addr_i     ( idma_req[s].dst_addr                    ),
+        .req_src_protocol_i ( idma_req[s].opt.src_protocol            ),
+        .req_dst_protocol_i ( idma_req[s].opt.dst_protocol            ),
+        .req_axi_id_i       ( idma_req[s].opt.axi_id                  ),
+        .req_src_burst_i    ( idma_req[s].opt.src.burst               ),
+        .req_src_cache_i    ( idma_req[s].opt.src.cache               ),
+        .req_src_lock_i     ( idma_req[s].opt.src.lock                ),
+        .req_src_prot_i     ( idma_req[s].opt.src.prot                ),
+        .req_src_qos_i      ( idma_req[s].opt.src.qos                 ),
+        .req_src_region_i   ( idma_req[s].opt.src.region              ),
+        .req_dst_burst_i    ( idma_req[s].opt.dst.burst               ),
+        .req_dst_cache_i    ( idma_req[s].opt.dst.cache               ),
+        .req_dst_lock_i     ( idma_req[s].opt.dst.lock                ),
+        .req_dst_prot_i     ( idma_req[s].opt.dst.prot                ),
+        .req_dst_qos_i      ( idma_req[s].opt.dst.qos                 ),
+        .req_dst_region_i   ( idma_req[s].opt.dst.region              ),
+        .req_decouple_aw_i  ( idma_req[s].opt.beo.decouple_aw         ),
+        .req_decouple_rw_i  ( idma_req[s].opt.beo.decouple_rw         ),
+        .req_src_max_llen_i ( idma_req[s].opt.beo.src_max_llen        ),
+        .req_dst_max_llen_i ( idma_req[s].opt.beo.dst_max_llen        ),
+        .req_src_reduce_len_i ( idma_req[s].opt.beo.src_reduce_len    ),
+        .req_dst_reduce_len_i ( idma_req[s].opt.beo.dst_reduce_len    ),
+        .req_last_i         ( idma_req[s].opt.last                    ),
+        .rsp_valid_o        ( be_rsp_valid[s]                         ),
+        .rsp_ready_i        ( be_rsp_ready[s]                         ),
+        .rsp_cause_o        ( idma_rsp[s].pld.cause                   ),
+        .rsp_err_type_o     ( idma_rsp[s].pld.err_type                ),
+        .rsp_burst_addr_o   ( idma_rsp[s].pld.burst_addr              ),
+        .rsp_error_o        ( idma_rsp[s].error                       ),
+        .rsp_last_o         ( idma_rsp[s].last                        ),
+
+        .eh_req_valid_i         ( '0                                  ),
+        .eh_req_ready_o         (  /* NOT CONNECTED */                ),
+        .eh_req_i               ( '0                                  ),
+
+        .init_read_req_valid_o  ( init_read_req.req_valid             ),
+        .init_read_req_config_o ( init_read_req.req_chan.cfg          ),
+        .init_read_req_ready_i  ( init_read_rsp.req_ready             ),
+
+        .init_read_rsp_valid_i  ( init_read_rsp.rsp_valid             ),
+        .init_read_rsp_init_i   ( init_read_rsp.rsp_chan.init         ),
+        .init_read_rsp_ready_o  ( init_read_req.rsp_ready             ),
+
+        .obi_read_req_a_req_o   ( obi_read_req_from_dma[s/2].req      ),
+        .obi_read_req_a_addr_o  ( obi_read_req_from_dma[s/2].a.addr   ),
+        .obi_read_req_a_we_o    ( obi_read_req_from_dma[s/2].a.we     ),
+        .obi_read_req_a_be_o    ( obi_read_req_from_dma[s/2].a.be     ),
+        .obi_read_req_a_wdata_o ( obi_read_req_from_dma[s/2].a.wdata  ),
+        .obi_read_req_r_ready_o ( obi_read_req_from_dma[s/2].rready   ),
+
+        .obi_read_rsp_a_gnt_i   ( obi_read_rsp_to_dma[s/2].gnt        ),
+        .obi_read_rsp_r_valid_i ( obi_read_rsp_to_dma[s/2].rvalid     ),
+        .obi_read_rsp_r_rdata_i ( obi_read_rsp_to_dma[s/2].r.rdata    ),
+        .obi_read_rsp_r_rid_i   ( obi_read_rsp_to_dma[s/2].r.rid      ),
+        .obi_read_rsp_r_err_i   ( obi_read_rsp_to_dma[s/2].r.err      ),
+
+        .axi_aw_id_o            ( dma_req[s].aw.id                    ),
+        .axi_aw_addr_o          ( dma_req[s].aw.addr                  ),
+        .axi_aw_len_o           ( dma_req[s].aw.len                   ),
+        .axi_aw_size_o          ( dma_req[s].aw.size                  ),
+        .axi_aw_burst_o         ( dma_req[s].aw.burst                 ),
+        .axi_aw_lock_o          ( dma_req[s].aw.lock                  ),
+        .axi_aw_cache_o         ( dma_req[s].aw.cache                 ),
+        .axi_aw_prot_o          ( dma_req[s].aw.prot                  ),
+        .axi_aw_qos_o           ( dma_req[s].aw.qos                   ),
+        .axi_aw_region_o        ( dma_req[s].aw.region                ),
+        .axi_aw_atop_o          ( dma_req[s].aw.atop                  ),
+        .axi_aw_user_o          ( dma_req[s].aw.user                  ),
+        .axi_aw_valid_o         ( dma_req[s].aw_valid                 ),
+        .axi_w_data_o           ( dma_req[s].w.data                   ),
+        .axi_w_strb_o           ( dma_req[s].w.strb                   ),
+        .axi_w_last_o           ( dma_req[s].w.last                   ),
+        .axi_w_user_o           ( dma_req[s].w.user                   ),
+        .axi_w_valid_o          ( dma_req[s].w_valid                  ),
+        .axi_b_ready_o          ( dma_req[s].b_ready                  ),
+
+        .axi_aw_ready_i         ( dma_rsp[s].aw_ready                 ),
+        .axi_w_ready_i          ( dma_rsp[s].w_ready                  ),
+        .axi_b_id_i             ( dma_rsp[s].b.id                     ),
+        .axi_b_resp_i           ( dma_rsp[s].b.resp                   ),
+        .axi_b_user_i           ( dma_rsp[s].b.user                   ),
+        .axi_b_valid_i          ( dma_rsp[s].b_valid                  ),
+
+        .init_write_req_valid_o ( init_write_req.req_valid            ),
+        .init_write_req_cfg_o   ( init_write_req.req_chan.cfg         ),
+        .init_write_req_term_o  ( init_write_req.req_chan.term        ),
+        .init_write_req_strb_o  ( init_write_req.req_chan.strb        ),
+        .init_write_req_id_o    ( init_write_req.req_chan.id          ),
+        .init_write_req_ready_i ( init_write_rsp.req_ready            ),
+
+        .init_write_rsp_valid_i ( init_write_rsp.rsp_valid            ),
+        .init_write_rsp_ready_o ( init_write_req.rsp_ready            ),
+        .idma_busy_o            ( idma_busy[s]                        )
+      );
+// #else
+//       idma_backend_r_obi_rw_init_w_axi #(
+//         .DataWidth           (AXI_DATA_WIDTH),
+//         .AddrWidth           (AXI_ADDR_WIDTH),
+//         .UserWidth           (AXI_USER_WIDTH),
+//         .AxiIdWidth          (AXI_ID_WIDTH),
+//         .NumAxInFlight       (NB_OUTSND_BURSTS),
+//         .BufferDepth         (32'd3),
+//         .TFLenWidth          (TFLenWidth),
+//         .MemSysDepth         (32'd0),
+//         .CombinedShifter     (1'b0),
+//         .RAWCouplingAvail    (1'b0),
+//         .MaskInvalidData     (1'b0),
+//         .HardwareLegalizer   (1'b1),
+//         .RejectZeroTransfers (1'b1),
+//         .idma_req_t          (idma_req_t),
+//         .idma_rsp_t          (idma_rsp_t),
+//         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
+//         .idma_busy_t         (idma_pkg::idma_busy_t),
+//         .axi_req_t           (axi_req_t),
+//         .axi_rsp_t           (axi_resp_t),
+//         .init_req_t          (init_req_t),
+//         .init_rsp_t          (init_rsp_t),
+//         .obi_req_t           (obi_req_t),
+//         .obi_rsp_t           (obi_rsp_t),
+//         .read_meta_channel_t (read_meta_channel_t),
+//         .write_meta_channel_t(write_meta_channel_t)
+//       ) i_idma_backend_r_obi_rw_init_w_axi (
+//         .clk_i,
+//         .rst_ni,
+//         .testmode_i      (test_mode_i),
+//         .idma_req_i      (idma_req[s]),
+//         .req_valid_i     (be_valid[s]),
+//         .req_ready_o     (be_ready[s]),
+//         .idma_rsp_o      (idma_rsp[s]),
+//         .rsp_valid_o     (be_rsp_valid[s]),
+//         .rsp_ready_i     (be_rsp_ready[s]),
+//         .idma_eh_req_i   (1'b0),
+//         .eh_req_valid_i  (1'b0),
+//         .eh_req_ready_o  (  /* NOT CONNECTED */),
+//         .init_read_req_o (init_read_req),
+//         .init_read_rsp_i (init_read_rsp),
+//         .obi_read_req_o  (obi_read_req_from_dma[s/2]),
+//         .obi_read_rsp_i  (obi_read_rsp_to_dma[s/2]),
+//         .axi_write_req_o (dma_req[s]),
+//         .axi_write_rsp_i (dma_rsp[s]),
+//         .init_write_req_o(init_write_req),
+//         .init_write_rsp_i(init_write_rsp),
+//         .busy_o          (idma_busy[s])
+//       );
+// #endif
 
        // use a spill register to only give responses when a request was
        // (or is) asserted
        spill_register #(
-         .T(logic [-1:0])
+         .T(logic)
        ) i_init_read_rsp_reflect (
          .clk_i,
          .rst_ni,
@@ -491,7 +611,7 @@
        assign init_read_rsp.rsp_chan.init = '0;
        // implement /dev/null
        spill_register #(
-         .T(logic [-1:0])
+         .T(logic)
        ) i_init_write_rsp_reflect (
          .clk_i,
          .rst_ni,
@@ -567,62 +687,190 @@
        init_req_t init_read_req, init_write_req;
        init_rsp_t init_read_rsp, init_write_rsp;
 
-       idma_backend_r_axi_rw_init_rw_obi #(
-         .DataWidth           (AXI_DATA_WIDTH),
-         .AddrWidth           (AXI_ADDR_WIDTH),
-         .UserWidth           (AXI_USER_WIDTH),
-         .AxiIdWidth          (AXI_ID_WIDTH),
-         .NumAxInFlight       (NB_OUTSND_BURSTS),
-         .BufferDepth         (32'd3),
-         .TFLenWidth          (TFLenWidth),
-         .MemSysDepth         (32'd0),
-         .CombinedShifter     (1'b0),
-         .RAWCouplingAvail    (1'b0),
-         .MaskInvalidData     (1'b0),
-         .HardwareLegalizer   (1'b1),
-         .RejectZeroTransfers (1'b1),
-         .idma_req_t          (idma_req_t),
-         .idma_rsp_t          (idma_rsp_t),
-         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
-         .idma_busy_t         (idma_pkg::idma_busy_t),
-         .axi_req_t           (axi_req_t),
-         .axi_rsp_t           (axi_resp_t),
-         .init_req_t          (init_req_t),
-         .init_rsp_t          (init_rsp_t),
-         .obi_req_t           (obi_req_t),
-         .obi_rsp_t           (obi_rsp_t),
-         .read_meta_channel_t (read_meta_channel_t),
-         .write_meta_channel_t(write_meta_channel_t)
-       ) i_idma_backend_r_axi_rw_init_rw_obi (
-         .clk_i,
-         .rst_ni,
-         .testmode_i      (test_mode_i),
-         .idma_req_i      (idma_req[s]),
-         .req_valid_i     (be_valid[s]),
-         .req_ready_o     (be_ready[s]),
-         .idma_rsp_o      (idma_rsp[s]),
-         .rsp_valid_o     (be_rsp_valid[s]),
-         .rsp_ready_i     (be_rsp_ready[s]),
-         .idma_eh_req_i   (1'b0),
-         .eh_req_valid_i  (1'b0),
-         .eh_req_ready_o  (  /* NOT CONNECTED */),
-         .axi_read_req_o  (dma_req[s]),
-         .axi_read_rsp_i  (dma_rsp[s]),
-         .init_read_req_o (init_read_req),
-         .init_read_rsp_i (init_read_rsp),
-         .obi_read_req_o  (obi_reorg_req_from_dma[s/2]),
-         .obi_read_rsp_i  (obi_reorg_rsp_to_dma[s/2]),
-         .init_write_req_o(init_write_req),
-         .init_write_rsp_i(init_write_rsp),
-         .obi_write_req_o (obi_write_req_from_dma[s/2]),
-         .obi_write_rsp_i (obi_write_rsp_to_dma[s/2]),
-         .busy_o          (idma_busy[s])
-       );
+// #ifdef SYNTHESIS
+      idma_backend_synth_r_axi_rw_init_rw_obi #(
+        .DataWidth           (AXI_DATA_WIDTH),
+        .AddrWidth           (AXI_ADDR_WIDTH),
+        .UserWidth           (AXI_USER_WIDTH),
+        .AxiIdWidth          (AXI_ID_WIDTH),
+        .NumAxInFlight       (NB_OUTSND_BURSTS),
+        .BufferDepth         (32'd3),
+        .TFLenWidth          (TFLenWidth),
+        .MemSysDepth         (32'd0),
+        .CombinedShifter     (1'b0),
+        .RAWCouplingAvail    (1'b0),
+        .MaskInvalidData     (1'b0),
+        .HardwareLegalizer   (1'b1),
+        .RejectZeroTransfers (1'b1),
+        .ErrorHandling       (1'b0)
+      ) i_idma_backend_r_axi_rw_init_rw_obi (
+        .clk_i              ( clk_i                                   ),
+        .rst_ni             ( rst_ni                                  ),
+        .test_i             ( test_mode_i                             ),
+        .req_valid_i        ( be_valid[s]                             ),
+        .req_ready_o        ( be_ready[s]                             ),
+        .req_length_i       ( idma_req[s].length                      ),
+        .req_src_addr_i     ( idma_req[s].src_addr                    ),
+        .req_dst_addr_i     ( idma_req[s].dst_addr                    ),
+        .req_src_protocol_i ( idma_req[s].opt.src_protocol            ),
+        .req_dst_protocol_i ( idma_req[s].opt.dst_protocol            ),
+        .req_axi_id_i       ( idma_req[s].opt.axi_id                  ),
+        .req_src_burst_i    ( idma_req[s].opt.src.burst               ),
+        .req_src_cache_i    ( idma_req[s].opt.src.cache               ),
+        .req_src_lock_i     ( idma_req[s].opt.src.lock                ),
+        .req_src_prot_i     ( idma_req[s].opt.src.prot                ),
+        .req_src_qos_i      ( idma_req[s].opt.src.qos                 ),
+        .req_src_region_i   ( idma_req[s].opt.src.region              ),
+        .req_dst_burst_i    ( idma_req[s].opt.dst.burst               ),
+        .req_dst_cache_i    ( idma_req[s].opt.dst.cache               ),
+        .req_dst_lock_i     ( idma_req[s].opt.dst.lock                ),
+        .req_dst_prot_i     ( idma_req[s].opt.dst.prot                ),
+        .req_dst_qos_i      ( idma_req[s].opt.dst.qos                 ),
+        .req_dst_region_i   ( idma_req[s].opt.dst.region              ),
+        .req_decouple_aw_i  ( idma_req[s].opt.beo.decouple_aw         ),
+        .req_decouple_rw_i  ( idma_req[s].opt.beo.decouple_rw         ),
+        .req_src_max_llen_i ( idma_req[s].opt.beo.src_max_llen        ),
+        .req_dst_max_llen_i ( idma_req[s].opt.beo.dst_max_llen        ),
+        .req_src_reduce_len_i ( idma_req[s].opt.beo.src_reduce_len    ),
+        .req_dst_reduce_len_i ( idma_req[s].opt.beo.dst_reduce_len    ),
+        .req_last_i         ( idma_req[s].opt.last                    ),
+        .rsp_valid_o        ( be_rsp_valid[s]                         ),
+        .rsp_ready_i        ( be_rsp_ready[s]                         ),
+        .rsp_cause_o        ( idma_rsp[s].pld.cause                   ),
+        .rsp_err_type_o     ( idma_rsp[s].pld.err_type                ),
+        .rsp_burst_addr_o   ( idma_rsp[s].pld.burst_addr              ),
+        .rsp_error_o        ( idma_rsp[s].error                       ),
+        .rsp_last_o         ( idma_rsp[s].last                        ),
+
+        .eh_req_valid_i         ( '0                                  ),
+        .eh_req_ready_o         (  /* NOT CONNECTED */                ),
+        .eh_req_i               ( '0                                  ),
+
+        .axi_ar_id_o        ( dma_req[s].ar.id                          ),
+        .axi_ar_addr_o      ( dma_req[s].ar.addr                        ),
+        .axi_ar_len_o       ( dma_req[s].ar.len                         ),
+        .axi_ar_size_o      ( dma_req[s].ar.size                        ),
+        .axi_ar_burst_o     ( dma_req[s].ar.burst                       ),
+        .axi_ar_lock_o      ( dma_req[s].ar.lock                        ),
+        .axi_ar_cache_o     ( dma_req[s].ar.cache                       ),
+        .axi_ar_prot_o      ( dma_req[s].ar.prot                        ),
+        .axi_ar_qos_o       ( dma_req[s].ar.qos                         ),
+        .axi_ar_region_o    ( dma_req[s].ar.region                      ),
+        .axi_ar_user_o      ( dma_req[s].ar.user                        ),
+        .axi_ar_valid_o     ( dma_req[s].ar_valid                       ),
+        .axi_r_ready_o      ( dma_req[s].r_ready                        ),
+
+        .axi_ar_ready_i     ( dma_rsp[s].ar_ready                       ),
+        .axi_r_id_i         ( dma_rsp[s].r.id                           ),
+        .axi_r_data_i       ( dma_rsp[s].r.data                         ),
+        .axi_r_resp_i       ( dma_rsp[s].r.resp                         ),
+        .axi_r_last_i       ( dma_rsp[s].r.last                         ),
+        .axi_r_user_i       ( dma_rsp[s].r.user                         ),
+        .axi_r_valid_i      ( dma_rsp[s].r_valid                        ),
+
+        .init_read_req_valid_o  ( init_read_req.req_valid               ),
+        .init_read_req_config_o ( init_read_req.req_chan.cfg            ),
+        .init_read_req_ready_i  ( init_read_rsp.req_ready               ),
+
+        .init_read_rsp_valid_i (init_read_rsp.rsp_valid                 ),
+        .init_read_rsp_init_i  ( init_read_rsp.rsp_chan.init            ),
+        .init_read_rsp_ready_o ( init_read_req.rsp_ready                ),
+
+        .obi_read_req_a_req_o   ( obi_reorg_req_from_dma[s/2].req       ),
+        .obi_read_req_a_addr_o  ( obi_reorg_req_from_dma[s/2].a.addr    ),
+        .obi_read_req_a_we_o    ( obi_reorg_req_from_dma[s/2].a.we      ),
+        .obi_read_req_a_be_o    ( obi_reorg_req_from_dma[s/2].a.be      ),
+        .obi_read_req_a_wdata_o ( obi_reorg_req_from_dma[s/2].a.wdata   ),
+        .obi_read_req_r_ready_o ( obi_reorg_req_from_dma[s/2].rready    ),
+
+        .obi_read_rsp_a_gnt_i   ( obi_reorg_rsp_to_dma[s/2].gnt         ),
+        .obi_read_rsp_r_valid_i ( obi_reorg_rsp_to_dma[s/2].rvalid      ),
+        .obi_read_rsp_r_rdata_i ( obi_reorg_rsp_to_dma[s/2].r.rdata     ),
+        .obi_read_rsp_r_rid_i   ( obi_reorg_rsp_to_dma[s/2].r.rid       ),
+        .obi_read_rsp_r_err_i   ( obi_reorg_rsp_to_dma[s/2].r.err       ),
+
+        .init_write_req_valid_o ( init_write_req.req_valid              ),
+        .init_write_req_cfg_o   ( init_write_req.req_chan.cfg           ),
+        .init_write_req_term_o  ( init_write_req.req_chan.term          ),
+        .init_write_req_strb_o  ( init_write_req.req_chan.strb          ),
+        .init_write_req_id_o    ( init_write_req.req_chan.id            ),
+        .init_write_req_ready_i (init_write_rsp.req_ready               ),
+
+        .init_write_rsp_valid_i ( init_write_rsp.rsp_valid              ),
+        .init_write_rsp_ready_o (init_write_req.rsp_ready               ),
+
+        .obi_write_req_a_req_o    ( obi_write_req_from_dma[s/2].req     ),
+        .obi_write_req_a_addr_o   ( obi_write_req_from_dma[s/2].a.addr  ),
+        .obi_write_req_a_we_o     ( obi_write_req_from_dma[s/2].a.we    ),
+        .obi_write_req_a_be_o     ( obi_write_req_from_dma[s/2].a.be    ),
+        .obi_write_req_a_wdata_o  ( obi_write_req_from_dma[s/2].a.wdata ),
+        .obi_write_req_a_aid_o    ( obi_write_req_from_dma[s/2].a.aid   ),
+        .obi_write_req_r_ready_o  ( obi_write_req_from_dma[s/2].rready  ),
+
+        .obi_write_rsp_a_gnt_i    ( obi_write_rsp_to_dma[s/2].gnt       ),
+        .obi_write_rsp_r_valid_i  ( obi_write_rsp_to_dma[s/2].rvalid    ),
+        .obi_write_rsp_r_rdata_i  ( obi_write_rsp_to_dma[s/2].r.rdata   ),
+
+        .idma_busy_o              ( idma_busy[s]                        )
+      );
+// #else
+//       idma_backend_r_axi_rw_init_rw_obi #(
+//         .DataWidth           (AXI_DATA_WIDTH),
+//         .AddrWidth           (AXI_ADDR_WIDTH),
+//         .UserWidth           (AXI_USER_WIDTH),
+//         .AxiIdWidth          (AXI_ID_WIDTH),
+//         .NumAxInFlight       (NB_OUTSND_BURSTS),
+//         .BufferDepth         (32'd3),
+//         .TFLenWidth          (TFLenWidth),
+//         .MemSysDepth         (32'd0),
+//         .CombinedShifter     (1'b0),
+//         .RAWCouplingAvail    (1'b0),
+//         .MaskInvalidData     (1'b0),
+//         .HardwareLegalizer   (1'b1),
+//         .RejectZeroTransfers (1'b1),
+//         .idma_req_t          (idma_req_t),
+//         .idma_rsp_t          (idma_rsp_t),
+//         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
+//         .idma_busy_t         (idma_pkg::idma_busy_t),
+//         .axi_req_t           (axi_req_t),
+//         .axi_rsp_t           (axi_resp_t),
+//         .init_req_t          (init_req_t),
+//         .init_rsp_t          (init_rsp_t),
+//         .obi_req_t           (obi_req_t),
+//         .obi_rsp_t           (obi_rsp_t),
+//         .read_meta_channel_t (read_meta_channel_t),
+//         .write_meta_channel_t(write_meta_channel_t)
+//       ) i_idma_backend_r_axi_rw_init_rw_obi (
+//         .clk_i,
+//         .rst_ni,
+//         .testmode_i      (test_mode_i),
+//         .idma_req_i      (idma_req[s]),
+//         .req_valid_i     (be_valid[s]),
+//         .req_ready_o     (be_ready[s]),
+//         .idma_rsp_o      (idma_rsp[s]),
+//         .rsp_valid_o     (be_rsp_valid[s]),
+//         .rsp_ready_i     (be_rsp_ready[s]),
+//         .idma_eh_req_i   (1'b0),
+//         .eh_req_valid_i  (1'b0),
+//         .eh_req_ready_o  (  /* NOT CONNECTED */),
+//         .axi_read_req_o  (dma_req[s]),
+//         .axi_read_rsp_i  (dma_rsp[s]),
+//         .init_read_req_o (init_read_req),
+//         .init_read_rsp_i (init_read_rsp),
+//         .obi_read_req_o  (obi_reorg_req_from_dma[s/2]),
+//         .obi_read_rsp_i  (obi_reorg_rsp_to_dma[s/2]),
+//         .init_write_req_o(init_write_req),
+//         .init_write_rsp_i(init_write_rsp),
+//         .obi_write_req_o (obi_write_req_from_dma[s/2]),
+//         .obi_write_rsp_i (obi_write_rsp_to_dma[s/2]),
+//         .busy_o          (idma_busy[s])
+//       );
+// #endif
 
        // use a spill register to only give responses when a request was
        // (or is) asserted
        spill_register #(
-         .T(logic [-1:0])
+         .T(logic)
        ) i_init_read_rsp_reflect (
          .clk_i,
          .rst_ni,
@@ -637,7 +885,7 @@
        assign init_read_rsp.rsp_chan.init = '0;
        // implement /dev/null
        spill_register #(
-         .T(logic [-1:0])
+         .T(logic)
        ) i_init_write_rsp_reflect (
          .clk_i,
          .rst_ni,
@@ -663,7 +911,7 @@
          CombGnt: 1'b0,
          AddrWidth: AXI_ADDR_WIDTH,
          DataWidth: AXI_DATA_WIDTH,
-         IdWidth: 0,
+         IdWidth: 1,
          Integrity: 1'b0,
          BeFull: 1'b1,
          OptionalCfg: obi_pkg::ObiMinimalOptionalConfig

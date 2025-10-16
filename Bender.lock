@@ -135,7 +135,7 @@ packages:
     dependencies:
     - common_cells
   hci:
-    revision: 2a5a5081a2b32f1a04e7e28c00d3762d92602b84
+    revision: f7fbfcd3bf4a4c27b03119381329aec0716d2a8a
     version: null
     source:
       Git: https://github.com/pulp-platform/hci.git
@@ -219,7 +219,7 @@ packages:
     dependencies:
     - common_cells
   neureka:
-    revision: f4e131c86205d37882cf02ea4dd3bd141ef32d86
+    revision: 2e076f7d25cdfba38821ee95595bb27aec53c764
     version: null
     source:
       Git: https://github.com/pulp-platform/neureka.git
@@ -245,8 +245,8 @@ packages:
     dependencies:
     - axi_slice
   redmule:
-    revision: 78696fb0d6d429bdad2e38740792648d44095605
-    version: 2.0.4
+    revision: dbcba6b1efda24dc909ebdd4ace132f798c8c12b
+    version: null
     source:
       Git: https://github.com/pulp-platform/redmule.git
     dependencies:

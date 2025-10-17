@@ -20,6 +20,7 @@ VLIB ?= $(QUESTA) vlib
 
 QSIM ?= $(QUESTA) qsim
 QOPT ?= $(QUESTA) qopt
+BENDER_GIT_DIR=$(ROOT_DIR)/.bender/git/checkouts
 
 top_level ?= pulp_cluster
 library ?= work
@@ -131,6 +132,9 @@ scripts/compile_lint.tcl:
 $(library):
 	$(QUESTA) vlib $(library)
 
+generate_idma_rtl:
+	$(MAKE) -C $(shell find $(BENDER_GIT_DIR) -type d -name 'idma*' | head -n 1) idma_hw_all
+
 compile: $(library)
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
 	@test -f scripts/compile.tcl || { echo "ERROR: scripts/compile.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
@@ -140,7 +144,7 @@ build_qone: compile
 	$(QOPT) $(compile_flag) -debug +designfile -suppress 3053 -suppress 8885 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized
 
 
-build: compile
+build: generate_idma_rtl compile
 	$(VOPT) $(compile_flag) -suppress 3053 -suppress 8885 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized +acc
 
 compile_lint: $(library)

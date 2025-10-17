@@ -194,10 +194,10 @@ packages:
     - common_cells
     - common_verification
   idma:
-    revision: e4e9c6fe385f6803052e3b2c09722638d6172359
+    revision: 4e2aad04a328f04ef494bd435f02b13605c9145f
     version: null
     source:
-      Git: https://github.com/RiccardoGandolfi/iDMA.git
+      Git: https://github.com/FondazioneChipsIT/iDMA.git
     dependencies:
     - axi
     - axi_stream

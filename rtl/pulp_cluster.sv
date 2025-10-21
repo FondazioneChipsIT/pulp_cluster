@@ -305,7 +305,7 @@ localparam hci_package::hci_size_parameter_t HciCoreSizeParam = '{
   EHW: DEFAULT_EHW
 };
 localparam hci_package::hci_size_parameter_t HciHwpeSizeParam = '{
-  DW:  Cfg.HwpeNumPorts * DataWidth,
+  DW:  (Cfg.HwpePresent) ? Cfg.HwpeNumPorts * DataWidth : 1,
   AW:  AddrWidth,
   BW:  DEFAULT_BW,
   UW:  DEFAULT_UW,

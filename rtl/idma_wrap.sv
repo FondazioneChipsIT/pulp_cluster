@@ -147,8 +147,8 @@
    // OBI typedefs
    `OBI_TYPEDEF_MINIMAL_A_OPTIONAL(a_optional_t)
    `OBI_TYPEDEF_MINIMAL_R_OPTIONAL(r_optional_t)
-   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, AXI_ADDR_WIDTH, AXI_DATA_WIDTH, AXI_ID_WIDTH, a_optional_t)
-   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, AXI_ID_WIDTH, r_optional_t)
+   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, ADDR_WIDTH, AXI_DATA_WIDTH, 0, a_optional_t)
+   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, 0, r_optional_t)
    `OBI_TYPEDEF_REQ_T(obi_req_t, obi_a_chan_t)
    `OBI_TYPEDEF_RSP_T(obi_rsp_t, obi_r_chan_t)
 
@@ -909,7 +909,7 @@
        localparam obi_pkg::obi_cfg_t sbr_obi_cfg = '{
          UseRReady: 1'b1,
          CombGnt: 1'b0,
-         AddrWidth: AXI_ADDR_WIDTH,
+         AddrWidth: ADDR_WIDTH,
          DataWidth: AXI_DATA_WIDTH,
          IdWidth: 1,
          Integrity: 1'b0,
@@ -1043,7 +1043,7 @@
        logic tcdm_master_we_5;
 
        mem_to_banks #(
-         .AddrWidth(AXI_ADDR_WIDTH),
+         .AddrWidth(ADDR_WIDTH),
          .DataWidth(AXI_DATA_WIDTH),
          .NumBanks (32'd2),
          .HideStrb (1'b1),
@@ -1084,7 +1084,7 @@
        assign tcdm_master[NB_TCDM_PORTS_PER_STRM*s+1].ecc   = '0;
 
        mem_to_banks #(
-         .AddrWidth(AXI_ADDR_WIDTH),
+         .AddrWidth(ADDR_WIDTH),
          .DataWidth(AXI_DATA_WIDTH),
          .NumBanks (32'd2),
          .HideStrb (1'b1),
@@ -1133,7 +1133,7 @@
        if (!MUX_READ) begin // if we don't mux the read, we have 6*NUM_BIDIR_STREAMS interfaces and the reorg
          // interface goes straight to TCDM masters 5 and 4.
          mem_to_banks #(
-           .AddrWidth(AXI_ADDR_WIDTH),
+           .AddrWidth(ADDR_WIDTH),
            .DataWidth(AXI_DATA_WIDTH),
            .NumBanks (32'd2),
            .HideStrb (1'b1),

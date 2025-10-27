@@ -113,8 +113,7 @@ module pulp_cluster
   input logic                                    pwr_on_rst_ni,
   input logic                                    pmu_mem_pwdn_i,
 
-
-  input logic [3:0]                              base_addr_i,
+  input logic [3:0]                              base_addr_i, //FIXME: do we really need this port?? base address is already in cfg
 
   input logic                                    test_mode_i,
 
@@ -203,7 +202,7 @@ module pulp_cluster
   output logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_rptr_o
 );
 
-//Ensure that the input AXI ID width is big enough to accomodate the accomodate the IDs of internal wiring
+//Ensure that the input AXI ID width is big enough to accomodate the IDs of internal wiring
 if (Cfg.AxiIdInWidth < 1 + $clog2(Cfg.iCacheNumBanks))
   $info("AXI input ID width must be larger than 1+$clog2(Cfg.iCacheNumBanks) which is %d but was %d", 1 + $clog2(Cfg.iCacheNumBanks), Cfg.AxiIdInWidth);
 
@@ -523,7 +522,7 @@ hci_core_intf #(
     .init_no    ( s_init_n    )
   );
 
-/* fetch & busy genertion */
+/* fetch & busy generation */
 assign s_cluster_int_busy = s_cluster_periphs_busy | s_per2axi_busy | s_axi2per_busy | s_axi2mem_busy | s_dmac_busy | s_hwpe_busy;
 assign busy_o = s_cluster_int_busy | (|core_busy);
 assign fetch_en_int = fetch_enable_reg_int;
@@ -793,8 +792,6 @@ cluster_peripherals #(
   .dma_event_i            ( s_dma_event                        ),
   .dma_irq_i              ( s_dma_irq                          ),
   .mbox_irq_i             ( mbox_irq_synch                     ),
-
-  // NEW_SIGNALS .decompr_done_evt_i     ( s_decompr_done_evt                 ),
 
   .dma_fc_event_i         ( s_dma_fc_event                     ),
   .dma_fc_irq_i           ( '0                                 ),
@@ -1135,18 +1132,18 @@ generate
     assign setback                      = '0;
 
     for (genvar i = 0; i < Cfg.NumCores; i++) begin
-      assign hmr2core[i].clock_en     = sys2hmr[i].clock_en;     
-      assign hmr2core[i].boot_addr    = sys2hmr[i].boot_addr;    
-      assign hmr2core[i].core_id      = sys2hmr[i].core_id;      
-      assign hmr2core[i].cluster_id   = sys2hmr[i].cluster_id;   
-      assign hmr2core[i].instr_gnt    = sys2hmr[i].instr_gnt;    
-      assign hmr2core[i].instr_rvalid = sys2hmr[i].instr_rvalid; 
-      assign hmr2core[i].instr_rdata  = sys2hmr[i].instr_rdata;  
-      assign hmr2core[i].data_gnt     = sys2hmr[i].data_gnt;     
-      assign hmr2core[i].data_rvalid  = sys2hmr[i].data_rvalid;  
-      assign hmr2core[i].data_rdata   = sys2hmr[i].data_rdata;   
-      assign hmr2core[i].irq_req      = sys2hmr[i].irq_req;      
-      assign hmr2core[i].irq_id       = sys2hmr[i].irq_id;       
+      assign hmr2core[i].clock_en     = sys2hmr[i].clock_en;
+      assign hmr2core[i].boot_addr    = sys2hmr[i].boot_addr;
+      assign hmr2core[i].core_id      = sys2hmr[i].core_id;
+      assign hmr2core[i].cluster_id   = sys2hmr[i].cluster_id;
+      assign hmr2core[i].instr_gnt    = sys2hmr[i].instr_gnt;
+      assign hmr2core[i].instr_rvalid = sys2hmr[i].instr_rvalid;
+      assign hmr2core[i].instr_rdata  = sys2hmr[i].instr_rdata;
+      assign hmr2core[i].data_gnt     = sys2hmr[i].data_gnt;
+      assign hmr2core[i].data_rvalid  = sys2hmr[i].data_rvalid;
+      assign hmr2core[i].data_rdata   = sys2hmr[i].data_rdata;
+      assign hmr2core[i].irq_req      = sys2hmr[i].irq_req;
+      assign hmr2core[i].irq_id       = sys2hmr[i].irq_id;
 
       assign hmr2sys[i].instr_req     = core2hmr[i].instr_req;
       assign hmr2sys[i].instr_addr    = core2hmr[i].instr_addr;
@@ -1184,12 +1181,12 @@ begin
   assign s_apu_master_rflags[k] = s_apu__rflags[k];
 end
 
-// At the moment, the cluster does not support any shared execution unit 
+// At the moment, the cluster does not support any shared execution unit
 assign s_apu_master_gnt    = '0;
 assign s_apu_master_rvalid = '0;
 assign s_apu_master_rdata  = '0;
 assign s_apu__rflags       = '0;
-  
+
 //**************************************************************
 //**** HW Processing Engines / Cluster-Coupled Accelerators ****
 //**************************************************************
@@ -1703,7 +1700,7 @@ axi_cdc_dst   #(
 );
 
 // If the AXI ID width of the subordinate port does not match the one required, we interpose
-// an AXI ID remapper. Otherwise the busses are simply assigned.
+// an AXI ID remapper. Otherwise the buses are simply assigned.
 `AXI_TYPEDEF_AW_CHAN_T(s2c_remap_aw_chan_t,logic[Cfg.AxiAddrWidth-1:0],logic[AxiIdInWidth-1:0],logic[Cfg.AxiUserWidth-1:0])
 `AXI_TYPEDEF_W_CHAN_T(s2c_remap_w_chan_t,logic[Cfg.AxiDataInWidth-1:0],logic[Cfg.AxiDataInWidth/8-1:0],logic[Cfg.AxiUserWidth-1:0])
 `AXI_TYPEDEF_B_CHAN_T(s2c_remap_b_chan_t,logic[AxiIdInWidth-1:0],logic[Cfg.AxiUserWidth-1:0])

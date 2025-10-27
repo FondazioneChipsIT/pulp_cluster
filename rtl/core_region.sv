@@ -61,12 +61,12 @@ import rapid_recovery_pkg::*;
 
   input logic [3:0]                      core_id_i,
   input logic [5:0]                      cluster_id_i,
-  
+
   input logic                            irq_req_i,
   output logic                           irq_ack_o,
   input logic [4:0]                      irq_id_i,
   output logic [4:0]                     irq_ack_id_o,
-  
+
   input logic                            clock_en_i,
   input logic                            fetch_en_i,
 
@@ -349,7 +349,7 @@ import rapid_recovery_pkg::*;
       assign boot_addr = boot_addr_i & 32'hFFFFFF00; // RI5CY expects 0x80 offset, Ibex expects 0x00 offset (adds reset offset 0x80 internally)
       // Core busy
       assign core_busy_o = ~core_sleep;
-      
+
       if (INSTR_RDATA_WIDTH == 128) begin
         instr_width_converter ibex_width_converter (
           .clk_i            ( clk_i              ),
@@ -381,7 +381,7 @@ import rapid_recovery_pkg::*;
         assign core_instr_r_rdata = instr_r_rdata_i;
         assign core_instr_r_valid = instr_r_valid_i;
       end
-      
+
       obi_pulp_adapter i_obi_pulp_adapter_mem (
         .clk_i       (clk_i             ),
         .rst_ni      (rst_ni            ),
@@ -513,6 +513,8 @@ import rapid_recovery_pkg::*;
     FILENAME = {"FETCH_CORE_", FILE_ID, ".log" };
     FILE=$fopen(FILENAME,"w");
   end
+
+  //FIXME: remove commented code
 
   // BOOT code is loaded in this dummy ROM_MEMORY
 /* -----\/----- EXCLUDED -----\/-----

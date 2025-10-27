@@ -31,11 +31,11 @@ dependencies:
   cv32e40p:               { git: "https://github.com/pulp-platform/cv32e40p.git", rev: astral-v1.0 }
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git", rev: "pulpissimo-v6.1.2" }
   scm:                    { git: "https://github.com/pulp-platform/scm.git", rev: v1.2.0 }
-  hci:                    { git: "https://github.com/pulp-platform/hci.git", rev: f7fbfcd3bf4a4c27b03119381329aec0716d2a8a } # yt/wen-filter
+  hci:                    { git: "https://github.com/pulp-platform/hci.git", rev:  2a5a508 } # yt/wen-filter
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.4  }
   redundancy_cells:       { git: "https://github.com/pulp-platform/redundancy_cells.git", rev: 6ba6f41 } # yt/redmule-v2
-  redmule:                { git: "https://github.com/pulp-platform/redmule.git", rev: dbcba6b1efda24dc909ebdd4ace132f798c8c12b }
-  neureka:                { git: "https://github.com/pulp-platform/neureka.git", rev: 2e076f7d25cdfba38821ee95595bb27aec53c764 } # branch: lg/astral-v1.1
+  redmule:                { git: "https://github.com/pulp-platform/redmule.git", version: =2.0.4 }
+  neureka:                { git: "https://github.com/pulp-platform/neureka.git", rev: f4e131c } # branch: lg/astral-v1.1
   softex:                 { git: "https://github.com/belanoa/softex.git"       , rev: astral-v1.0 }
 
 export_include_dirs:

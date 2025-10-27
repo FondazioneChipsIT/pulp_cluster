@@ -147,8 +147,8 @@
    // OBI typedefs
    `OBI_TYPEDEF_MINIMAL_A_OPTIONAL(a_optional_t)
    `OBI_TYPEDEF_MINIMAL_R_OPTIONAL(r_optional_t)
-   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, ADDR_WIDTH, AXI_DATA_WIDTH, 0, a_optional_t)
-   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, 0, r_optional_t)
+   `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, ADDR_WIDTH, AXI_DATA_WIDTH, AXI_ID_WIDTH, a_optional_t)
+   `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, AXI_ID_WIDTH, r_optional_t)
    `OBI_TYPEDEF_REQ_T(obi_req_t, obi_a_chan_t)
    `OBI_TYPEDEF_RSP_T(obi_rsp_t, obi_r_chan_t)
 

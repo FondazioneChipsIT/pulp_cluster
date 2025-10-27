@@ -482,12 +482,12 @@ import rapid_recovery_pkg::*;
   always @(posedge clk_i)
   begin : CHECK_ASSERTIONS
 `ifndef CLUSTER_ALIAS
-    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add < 32'h1000_0000)) begin
-      $error("ERROR_1 (0x00000000 -> 0x10000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
+    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add < 32'hB000_0000)) begin //FIXME: use parameters in place of these addresses!
+      $error("ERROR_1 (0x00000000 -> 0xB0000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
       $finish();
     end
-    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add >= 32'h1040_0000) && ((core_data_req_o.add < 32'h1A00_0000))) begin
-      $error("ERROR_2 (0x10400000 -> 0x1A000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
+    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add >= 32'hB040_0000) && ((core_data_req_o.add < 32'h1A00_0000))) begin //FIXME: use parameters in place of these addresses!
+      $error("ERROR_2 (0xB0400000 -> 0xBA000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
       $finish();
     end
 `endif

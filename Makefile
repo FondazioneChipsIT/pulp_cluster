@@ -80,8 +80,8 @@ sw-clean:
 	@rm -rf pulp-runtime fault_injection_sim regression_tests
 
 ## Clone pulp-runtime as SW stack
-PULP_RUNTIME_REMOTE ?= git@github.com:RiccardoGandolfi/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 048502d346e13753e384d9777829db26468097d6 # branch: lg/upstream
+PULP_RUNTIME_REMOTE ?= git@github.com:FondazioneChipsIT/pulp-runtime.git
+PULP_RUNTIME_COMMIT ?= 093ec1f95302c2c616a7b52336248ee30d40b1b8 # branch: lg/upstream
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
@@ -96,8 +96,8 @@ fault_injection_sim:
 	cd $@ && git checkout $(FAULT_SIM_COMMIT)
 
 ## Clone regression tests
-REGRESSION_TESTS_REMOTE ?= git@github.com:RiccardoGandolfi/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= 6fac940e924c7de83b37d7be14bfd9febbf04678 # branch: lg/upstream
+REGRESSION_TESTS_REMOTE ?= git@github.com:FondazioneChipsIT/regression_tests.git
+REGRESSION_TESTS_COMMIT ?= 6fac940e924c7de83b37d7be14bfd9febbf04678 # branch: new_iDMA_tests
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@
@@ -126,7 +126,7 @@ scripts/synth-compile.tcl: | Bender.lock
 
 scripts/compile_lint.tcl:
 	echo 'set ROOT $(ROOT_DIR)' > $@
-	$(BENDER) script vsim --vlog-arg="$(VLOG_ARGS_LINT)" $(common_defs) $(common_targs) $(synth_targs) $(synth_defs) | grep -v "set ROOT" >> $@
+	$(BENDER) script vsim --vlog-arg="$(VLOG_ARGS_LINT)" $(common_defs) $(common_targs) | grep -v "set ROOT" >> $@
 	echo >> $@
 
 $(library):

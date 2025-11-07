@@ -8,7 +8,7 @@ if {[info exists USE_QONE] && $USE_QONE == 1} {
     $QSIM -qwavedb=+signal+memory +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $VSIM_PATH/work +APP=./build/test/test +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++./build/test/test
 } else {
     set VSIM vsim
-    $VSIM -qwavedb=+signal+memory +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $VSIM_PATH/work +APP=./build/test/test +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++./build/test/test
+    $VSIM +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $VSIM_PATH/work +APP=./build/test/test +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++./build/test/test
 }
 
 if {[info exists ::env(FAULT_INJECTION)]} {

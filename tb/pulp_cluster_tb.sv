@@ -582,5 +582,38 @@ module pulp_cluster_tb;
 
   end
 
+/**************
+ *  VCD Dump  *
+ **************/
+
+`ifdef VCD_DUMP
+  initial begin: vcd_dump
+    string vcd_dump_file;
+
+    // Wait for the reset
+    wait (s_rstn);
+
+    // Wait until the probe is high
+    while (!s_cluster_fetch_en)
+      @(posedge s_clk);
+
+     if ( $value$plusargs ("VCD_DUMP_FILE=%s", vcd_dump_file));
+     $display("[TB] Dumping VCD in %s", vcd_dump_file);
+
+    $dumpfile(vcd_dump_file);
+    $dumpvars(0, cluster_i);
+    $dumpon;
+
+    // Wait until the probe is low
+    while (s_cluster_fetch_en)
+      @(posedge s_clk);
+
+    $dumpoff;
+
+    // Stop the execution
+    $finish(0);
+  end: vcd_dump
+`endif
+
 
 endmodule : pulp_cluster_tb

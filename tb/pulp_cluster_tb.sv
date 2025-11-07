@@ -350,11 +350,15 @@ module pulp_cluster_tb;
     default: '0
   };
 
+`ifdef CLUSTER_NETLIST
+  pulp_cluster_wrap
+`else
   pulp_cluster
 `ifdef USE_PULP_PARAMETERS
   #(
     .Cfg ( PulpClusterCfg )
    )
+`endif
 `endif
   cluster_i (
     .clk_i                       ( s_clk                                ),

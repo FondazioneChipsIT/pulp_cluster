@@ -10,15 +10,77 @@
 
 // Yvan Tortorella <yvan.tortorella@unibo.it>
 
-import pulp_cluster_package::*;
-import axi_pkg::*;
 
 package pulp_cluster_wrap_package;
-  localparam pulp_cluster_package::pulp_cluster_cfg_t Cfg = pulp_cluster_package::PulpClusterDefaultCfg;
+
+  localparam pulp_cluster_package::pulp_cluster_cfg_t Cfg = '{
+    CoreType: pulp_cluster_package::RI5CY,
+    NumCores: 8,
+    DmaNumPlugs: 4,
+    DmaNumOutstandingBursts: 8,
+    DmaBurstLength: 256,
+    NumMstPeriphs: 1,
+    NumSlvPeriphs: 12,
+    ClusterAlias: 1,
+    ClusterAliasBase: 'h0,
+    NumSyncStages: 3,
+    UseHci: 1,
+    TcdmSize: 128*1024,
+    TcdmNumBank: 16,
+    HwpePresent: 1,
+    HwpeCfg: '{NumHwpes: 3, HwpeList: {pulp_cluster_package::SOFTEX, pulp_cluster_package::NEUREKA, pulp_cluster_package::REDMULE}},
+    HwpeNumPorts: 9,
+    HMRPresent: 1,
+    HMRDmrEnabled: 1,
+    HMRTmrEnabled: 1,
+    HMRDmrFIxed: 0,
+    HMRTmrFIxed: 0,
+    HMRInterleaveGrps: 1,
+    HMREnableRapidRecovery: 1,
+    HMRSeparateDataVoters:1,
+    HMRSeparateAxiBus:0,
+    HMRNumBusVoters:1,
+    EnableECC: 1,
+    ECCInterco: 1,
+    iCacheNumBanks: 2,
+    iCacheNumLines: 1,
+    iCacheNumWays: 4,
+    iCacheSharedSize: 4*1024,
+    iCachePrivateSize: 512,
+    iCachePrivateDataWidth: 32,
+    EnableReducedTag: 1,
+    L2Size: 1000*1024,
+    DmBaseAddr: 'h60203000,
+    BootRomBaseAddr: 'h1C000000 + 'h8080,
+    BootAddr: 'h1C000000 + 'h8080,
+    EnablePrivateFpu: 1,
+    EnablePrivateFpDivSqrt: 0,
+    EnableSharedFpu: 0,
+    EnableSharedFpDivSqrt: 0,
+    NumSharedFpu: 0,
+    NumAxiIn: 4,
+    NumAxiOut: 3,
+    AxiIdInWidth: 4,
+    AxiIdOutWidth: 6,
+    AxiAddrWidth: 32,
+    AxiDataInWidth: 64,
+    AxiDataOutWidth: 64,
+    AxiUserWidth: 10,
+    AxiMaxInTrans: 64,
+    AxiMaxOutTrans: 64,
+    AxiCdcLogDepth: 3,
+    AxiCdcSyncStages: 3,
+    SyncStages: 3,
+    ClusterBaseAddr: 'h10000000,
+    ClusterPeriphOffs: 'h00200000,
+    ClusterExternalOffs: 'h00400000,
+    EnableRemapAddress: 0,
+    SnitchICache: 0,
+    default: '0
+  };
+
   localparam int unsigned EventWidth = 8;
 
-  localparam int unsigned AxiIdInWidth = pulp_cluster_package::AxiSubordinateIdwidth;
-  localparam int unsigned AxiIdOutWidth = pulp_cluster_package::AxiManagerIdwidth;
   // CDC AXI parameters (external to cluster)
   localparam int unsigned AwInWidth = axi_pkg::aw_width(Cfg.AxiAddrWidth,
                                                         Cfg.AxiIdInWidth,

@@ -55,7 +55,7 @@ nonfree-init:
 
 .PHONY: init
 
-init: checkout
+init: checkout generate_idma_rtl
 
 .PHONY: checkout
 ## Checkout/update dependencies using Bender

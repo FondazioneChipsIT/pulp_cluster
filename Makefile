@@ -20,6 +20,7 @@ VLIB ?= $(QUESTA) vlib
 
 QSIM ?= $(QUESTA) qsim
 QOPT ?= $(QUESTA) qopt
+Q1VE ?= q1ve --qverify
 BENDER_GIT_DIR=$(ROOT_DIR)/.bender/git/checkouts
 
 top_level ?= pulp_cluster
@@ -148,19 +149,21 @@ build: generate_idma_rtl compile
 	$(VOPT) $(compile_flag) -suppress 3053 -suppress 8885 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized +acc
 
 compile_lint: $(library)
-	qverify -od lint/comp_lint_results -c -do " \
+	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
+	@test -f scripts/compile_lint.tcl || { echo "ERROR: scripts/compile_lint.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
+	$(Q1VE) -od lint/comp_lint_results -c -do " \
 	onerror {exit}; \
 	do scripts/compile_lint.tcl; \
 	exit"
 
 lint: compile_lint
-	qverify -od lint/lint_results -c -do " \
+	$(Q1VE) -od lint/lint_results -c -do " \
 	lint methodology ip -goal release; \
 	lint run -d $(top_level); \
 	exit"
 
 cdc: compile_lint
-	qverify -od cdc_results -c -do " \
+	$(Q1VE) -od cdc_results -c -do " \
 	cdc run -d $(top_level); \
 	exit"
 

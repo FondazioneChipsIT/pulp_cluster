@@ -21,7 +21,8 @@ VLIB ?= $(QUESTA) vlib
 QSIM ?= $(QUESTA) qsim
 QOPT ?= $(QUESTA) qopt
 Q1VE ?= q1ve --qverify
-BENDER_GIT_DIR=$(ROOT_DIR)/.bender/git/checkouts
+
+VENV  := venv
 
 top_level ?= pulp_cluster
 library ?= work
@@ -133,8 +134,13 @@ scripts/compile_lint.tcl:
 $(library):
 	$(QUESTA) vlib $(library)
 
-generate_idma_rtl:
-	$(MAKE) -C $(shell find $(BENDER_GIT_DIR) -type d -name 'idma*' | head -n 1) idma_hw_all
+venv:
+	python3 -m venv $(VENV) && \
+	$(VENV)/bin/python -m pip install -U pip && \
+	$(VENV)/bin/python -m pip install -r $(shell bender path idma)/requirements.txt
+
+generate_idma_rtl: venv
+	. "$(VENV)/bin/activate" && $(MAKE) -C $(shell bender path idma) idma_hw_all
 
 compile: $(library)
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }

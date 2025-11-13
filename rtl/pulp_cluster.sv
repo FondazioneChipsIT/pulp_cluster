@@ -726,7 +726,7 @@ dmac_wrap #(
 `else
   .NB_PE_PORTS        ( 2                           ),
   .NUM_BIDIR_STREAMS  ( 1                           ),
-  .GLOBAL_QUEUE_DEPTH ( 2                           ),
+  .GLOBAL_QUEUE_DEPTH ( 8                           ),
   .MUX_READ           ( 1'b1                        ),
   .TCDM_MEM2BANKS     ( 1                           )
 `endif

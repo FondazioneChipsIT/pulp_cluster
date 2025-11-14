@@ -113,8 +113,6 @@ module pulp_cluster
   input logic                                    pwr_on_rst_ni,
   input logic                                    pmu_mem_pwdn_i,
 
-  input logic [3:0]                              base_addr_i, //FIXME: do we really need this port?? base address is already in cfg
-
   input logic                                    test_mode_i,
 
   input logic                                    en_sa_boot_i,
@@ -1017,6 +1015,7 @@ generate
       .RemapAddress        ( Cfg.EnableRemapAddress ),
       .ClustAlias          ( Cfg.ClusterAlias       ),
       .ClustAliasBase      ( Cfg.ClusterAliasBase   ),
+      .ClustBaseAddr       ( Cfg.ClusterBaseAddr    ),
       .NumExtPerf          ( 5                      ),
       .core_data_req_t     ( core_data_req_t        ),
       .core_data_rsp_t     ( core_data_rsp_t        )
@@ -1025,7 +1024,6 @@ generate
       .rst_ni              ( rst_ni                ),
       .test_en_i           ( test_mode_i           ),
       .clk_en_i            ( clk_core_en[i]        ),
-      .base_addr_i         ( base_addr_i           ),
       .ext_perf_o          ( ext_perf[i]           ),
       .core_data_req_i     ( demux_data_req[i]     ),
       .core_data_rsp_o     ( demux_data_rsp[i]     ),

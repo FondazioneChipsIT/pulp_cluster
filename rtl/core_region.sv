@@ -47,6 +47,7 @@ import rapid_recovery_pkg::*;
   parameter int unsigned  FP_DIVSQRT              =  0,
 
   parameter int unsigned  DEBUG_START_ADDR        = 32'h1A110000,
+  parameter int unsigned  CLUSTER_BASE            = 32'h10000000,
 
   parameter type core_data_req_t    = logic,
   parameter type core_data_rsp_t    = logic,
@@ -482,12 +483,12 @@ import rapid_recovery_pkg::*;
   always @(posedge clk_i)
   begin : CHECK_ASSERTIONS
 `ifndef CLUSTER_ALIAS
-    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add < 32'hB000_0000)) begin //FIXME: use parameters in place of these addresses!
-      $error("ERROR_1 (0x00000000 -> 0xB0000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
+    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add < CLUSTER_BASE)) begin
+      $error("ERROR_1 (0x00000000 -> 0x%8x) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" , CLUSTER_BASE, core_data_req_o.add, $time()/1000 );
       $finish();
     end
-    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add >= 32'hB040_0000) && ((core_data_req_o.add < 32'h1A00_0000))) begin //FIXME: use parameters in place of these addresses!
-      $error("ERROR_2 (0xB0400000 -> 0xBA000000) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" ,core_data_req_o.add, $time()/1000 );
+    if ((core_data_req_o.req == 1'b1) && (core_data_req_o.add >= (CLUSTER_BASE + 32'h0040_0000)) && ((core_data_req_o.add < (CLUSTER_BASE + 32'h0A00_0000)))) begin
+      $error("ERROR_2 (0x%8x -> 0x%8x) : Data interface is making a request on unmapped region --> %8x\t at time %t [ns]" , CLUSTER_BASE + 32'h0040_0000, CLUSTER_BASE + 32'h0A00_0000, core_data_req_o.add, $time()/1000 );
       $finish();
     end
 `endif

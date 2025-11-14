@@ -921,6 +921,7 @@ generate
       .APU_NDSFLAGS_CPU    ( FpuInFlagsWidth            ),
       .APU_NUSFLAGS_CPU    ( FpuOutFlagsWidth           ),
       .DEBUG_START_ADDR    ( Cfg.DmBaseAddr             ),
+      .CLUSTER_BASE        ( Cfg.ClusterBaseAddr        ),
       .FPU                 ( Cfg.EnablePrivateFpu       ),
       .FP_DIVSQRT          ( Cfg.EnablePrivateFpDivSqrt ),
       .core_data_req_t     ( core_data_req_t            ),

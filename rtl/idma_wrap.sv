@@ -144,14 +144,13 @@
      logic           req_ready;
    } init_rsp_t;
 
-   // OBI typedefs
+   // OBI typedefs (ADDR_WIDTH)
    `OBI_TYPEDEF_MINIMAL_A_OPTIONAL(a_optional_t)
    `OBI_TYPEDEF_MINIMAL_R_OPTIONAL(r_optional_t)
    `OBI_TYPEDEF_A_CHAN_T(obi_a_chan_t, ADDR_WIDTH, AXI_DATA_WIDTH, AXI_ID_WIDTH, a_optional_t)
    `OBI_TYPEDEF_R_CHAN_T(obi_r_chan_t, AXI_DATA_WIDTH, AXI_ID_WIDTH, r_optional_t)
    `OBI_TYPEDEF_REQ_T(obi_req_t, obi_a_chan_t)
    `OBI_TYPEDEF_RSP_T(obi_rsp_t, obi_r_chan_t)
-
 
    obi_req_t [NUM_BIDIR_STREAMS-1:0]
      obi_read_req_from_dma,
@@ -170,6 +169,14 @@
      obi_write_rsp_to_rrc,
      obi_read_rsp_to_mux;
 
+   // OBI typedefs (AXI_ADDR_WIDTH)
+   `OBI_TYPEDEF_A_CHAN_T(obi2axi_a_chan_t, AXI_ADDR_WIDTH, AXI_DATA_WIDTH, AXI_ID_WIDTH, a_optional_t)
+   `OBI_TYPEDEF_REQ_T(obi2axi_req_t, obi2axi_a_chan_t)
+
+   obi2axi_req_t [NUM_BIDIR_STREAMS-1:0]
+     obi2axi_read_req_from_dma,
+     obi2axi_reorg_req_from_dma,
+     obi2axi_write_req_from_dma;
 
    // BUS definitions
    axi_req_t  [NUM_BIDIR_STREAMS-1:0] soc_req;
@@ -422,9 +429,17 @@
        init_req_t init_read_req, init_write_req;
        init_rsp_t init_read_rsp, init_write_rsp;
 
+      // BINDING between ADD_WIDTH <-> AXI_ADDR_WIDTH
+      assign obi_read_req_from_dma[s/2].req     = obi2axi_read_req_from_dma[s/2].req    ;
+      assign obi_read_req_from_dma[s/2].a.addr  = obi2axi_read_req_from_dma[s/2].a.addr ;
+      assign obi_read_req_from_dma[s/2].a.we    = obi2axi_read_req_from_dma[s/2].a.we   ;
+      assign obi_read_req_from_dma[s/2].a.be    = obi2axi_read_req_from_dma[s/2].a.be   ;
+      assign obi_read_req_from_dma[s/2].a.wdata = obi2axi_read_req_from_dma[s/2].a.wdata;
+      assign obi_read_req_from_dma[s/2].rready  = obi2axi_read_req_from_dma[s/2].rready ;
+
 // #ifdef SYNTHESIS
       idma_backend_synth_r_obi_rw_init_w_axi #(
-        .DataWidth          ( AXI_DATA_WIDTH   ),
+        .DataWidth           ( AXI_DATA_WIDTH   ),
         .AddrWidth           ( AXI_ADDR_WIDTH   ),
         .UserWidth           ( AXI_USER_WIDTH   ),
         .AxiIdWidth          ( AXI_ID_WIDTH     ),
@@ -489,12 +504,12 @@
         .init_read_rsp_init_i   ( init_read_rsp.rsp_chan.init         ),
         .init_read_rsp_ready_o  ( init_read_req.rsp_ready             ),
 
-        .obi_read_req_a_req_o   ( obi_read_req_from_dma[s/2].req      ),
-        .obi_read_req_a_addr_o  ( obi_read_req_from_dma[s/2].a.addr   ),
-        .obi_read_req_a_we_o    ( obi_read_req_from_dma[s/2].a.we     ),
-        .obi_read_req_a_be_o    ( obi_read_req_from_dma[s/2].a.be     ),
-        .obi_read_req_a_wdata_o ( obi_read_req_from_dma[s/2].a.wdata  ),
-        .obi_read_req_r_ready_o ( obi_read_req_from_dma[s/2].rready   ),
+        .obi_read_req_a_req_o   ( obi2axi_read_req_from_dma[s/2].req      ),
+        .obi_read_req_a_addr_o  ( obi2axi_read_req_from_dma[s/2].a.addr   ),
+        .obi_read_req_a_we_o    ( obi2axi_read_req_from_dma[s/2].a.we     ),
+        .obi_read_req_a_be_o    ( obi2axi_read_req_from_dma[s/2].a.be     ),
+        .obi_read_req_a_wdata_o ( obi2axi_read_req_from_dma[s/2].a.wdata  ),
+        .obi_read_req_r_ready_o ( obi2axi_read_req_from_dma[s/2].rready   ),
 
         .obi_read_rsp_a_gnt_i   ( obi_read_rsp_to_dma[s/2].gnt        ),
         .obi_read_rsp_r_valid_i ( obi_read_rsp_to_dma[s/2].rvalid     ),
@@ -687,6 +702,21 @@
        init_req_t init_read_req, init_write_req;
        init_rsp_t init_read_rsp, init_write_rsp;
 
+      // BINDING between ADD_WIDTH <-> AXI_ADDR_WIDTH
+      assign obi_reorg_req_from_dma[s/2].req     = obi2axi_reorg_req_from_dma[s/2].req    ;
+      assign obi_reorg_req_from_dma[s/2].a.addr  = obi2axi_reorg_req_from_dma[s/2].a.addr ;
+      assign obi_reorg_req_from_dma[s/2].a.we    = obi2axi_reorg_req_from_dma[s/2].a.we   ;
+      assign obi_reorg_req_from_dma[s/2].a.be    = obi2axi_reorg_req_from_dma[s/2].a.be   ;
+      assign obi_reorg_req_from_dma[s/2].a.wdata = obi2axi_reorg_req_from_dma[s/2].a.wdata;
+      assign obi_reorg_req_from_dma[s/2].rready  = obi2axi_reorg_req_from_dma[s/2].rready ;
+
+      assign obi_write_req_from_dma[s/2].req     = obi2axi_write_req_from_dma[s/2].req    ;
+      assign obi_write_req_from_dma[s/2].a.addr  = obi2axi_write_req_from_dma[s/2].a.addr ;
+      assign obi_write_req_from_dma[s/2].a.we    = obi2axi_write_req_from_dma[s/2].a.we   ;
+      assign obi_write_req_from_dma[s/2].a.be    = obi2axi_write_req_from_dma[s/2].a.be   ;
+      assign obi_write_req_from_dma[s/2].a.wdata = obi2axi_write_req_from_dma[s/2].a.wdata;
+      assign obi_write_req_from_dma[s/2].rready  = obi2axi_write_req_from_dma[s/2].rready ;
+
 // #ifdef SYNTHESIS
       idma_backend_synth_r_axi_rw_init_rw_obi #(
         .DataWidth           (AXI_DATA_WIDTH),
@@ -776,12 +806,12 @@
         .init_read_rsp_init_i  ( init_read_rsp.rsp_chan.init            ),
         .init_read_rsp_ready_o ( init_read_req.rsp_ready                ),
 
-        .obi_read_req_a_req_o   ( obi_reorg_req_from_dma[s/2].req       ),
-        .obi_read_req_a_addr_o  ( obi_reorg_req_from_dma[s/2].a.addr    ),
-        .obi_read_req_a_we_o    ( obi_reorg_req_from_dma[s/2].a.we      ),
-        .obi_read_req_a_be_o    ( obi_reorg_req_from_dma[s/2].a.be      ),
-        .obi_read_req_a_wdata_o ( obi_reorg_req_from_dma[s/2].a.wdata   ),
-        .obi_read_req_r_ready_o ( obi_reorg_req_from_dma[s/2].rready    ),
+        .obi_read_req_a_req_o   ( obi2axi_reorg_req_from_dma[s/2].req       ),
+        .obi_read_req_a_addr_o  ( obi2axi_reorg_req_from_dma[s/2].a.addr    ),
+        .obi_read_req_a_we_o    ( obi2axi_reorg_req_from_dma[s/2].a.we      ),
+        .obi_read_req_a_be_o    ( obi2axi_reorg_req_from_dma[s/2].a.be      ),
+        .obi_read_req_a_wdata_o ( obi2axi_reorg_req_from_dma[s/2].a.wdata   ),
+        .obi_read_req_r_ready_o ( obi2axi_reorg_req_from_dma[s/2].rready    ),
 
         .obi_read_rsp_a_gnt_i   ( obi_reorg_rsp_to_dma[s/2].gnt         ),
         .obi_read_rsp_r_valid_i ( obi_reorg_rsp_to_dma[s/2].rvalid      ),
@@ -799,13 +829,13 @@
         .init_write_rsp_valid_i ( init_write_rsp.rsp_valid              ),
         .init_write_rsp_ready_o (init_write_req.rsp_ready               ),
 
-        .obi_write_req_a_req_o    ( obi_write_req_from_dma[s/2].req     ),
-        .obi_write_req_a_addr_o   ( obi_write_req_from_dma[s/2].a.addr  ),
-        .obi_write_req_a_we_o     ( obi_write_req_from_dma[s/2].a.we    ),
-        .obi_write_req_a_be_o     ( obi_write_req_from_dma[s/2].a.be    ),
-        .obi_write_req_a_wdata_o  ( obi_write_req_from_dma[s/2].a.wdata ),
-        .obi_write_req_a_aid_o    ( obi_write_req_from_dma[s/2].a.aid   ),
-        .obi_write_req_r_ready_o  ( obi_write_req_from_dma[s/2].rready  ),
+        .obi_write_req_a_req_o    ( obi2axi_write_req_from_dma[s/2].req     ),
+        .obi_write_req_a_addr_o   ( obi2axi_write_req_from_dma[s/2].a.addr  ),
+        .obi_write_req_a_we_o     ( obi2axi_write_req_from_dma[s/2].a.we    ),
+        .obi_write_req_a_be_o     ( obi2axi_write_req_from_dma[s/2].a.be    ),
+        .obi_write_req_a_wdata_o  ( obi2axi_write_req_from_dma[s/2].a.wdata ),
+        .obi_write_req_a_aid_o    ( obi2axi_write_req_from_dma[s/2].a.aid   ),
+        .obi_write_req_r_ready_o  ( obi2axi_write_req_from_dma[s/2].rready  ),
 
         .obi_write_rsp_a_gnt_i    ( obi_write_rsp_to_dma[s/2].gnt       ),
         .obi_write_rsp_r_valid_i  ( obi_write_rsp_to_dma[s/2].rvalid    ),

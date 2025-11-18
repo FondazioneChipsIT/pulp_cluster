@@ -83,7 +83,7 @@ module data_periph_demux
 
    logic [10:0] CLUSTER_ALIAS_BASE_11;
    logic [11:0] CLUSTER_ALIAS_BASE_12;
-   logic [3:0] base_addr = CLUSTER_BASE_ADDR[ADDR_WIDTH-1:ADDR_WIDTH-4];
+   localparam logic [3:0] BASE_ADDR = CLUSTER_BASE_ADDR[ADDR_WIDTH-1:ADDR_WIDTH-4];
 
    logic                                  s_data_req_PE;
    logic                                  s_data_gnt_PE;
@@ -134,17 +134,17 @@ module data_periph_demux
 
   always_comb
   begin
-    TCDM_RW          = {base_addr, 8'h00} + 0;
-    TCDM_TS          = {base_addr, 8'h00} + 1;
-    DEM_PER          = {base_addr, 8'h00} + 2;
+    TCDM_RW          = {BASE_ADDR, 8'h00} + 0;
+    TCDM_TS          = {BASE_ADDR, 8'h00} + 1;
+    DEM_PER          = {BASE_ADDR, 8'h00} + 2;
   end
 
 
 
    // This section is used to swap the 4 most significant bits of the address
-   // with the ones that are provided by the base_addr
-   // If data_add_i[31:28] == base_addr then data_add_i[31:28] are changed in 4'b0001
-   // If data_add_i[31:28] == 4'b0001 --> then th data_add_i[31:28] is changed in base_addr
+   // with the ones that are provided by the BASE_ADDR
+   // If data_add_i[31:28] == BASE_ADDR then data_add_i[31:28] are changed in 4'b0001
+   // If data_add_i[31:28] == 4'b0001 --> then th data_add_i[31:28] is changed in BASE_ADDR
    // In the other cases, the address is unchanged
 
    assign data_add_int[27:0] = data_add_i[27:0];
@@ -152,13 +152,13 @@ module data_periph_demux
 if (REMAP_ADDRESS == 1) begin
    always_comb
    begin
-    if(data_add_i[31:28] == base_addr)
+    if(data_add_i[31:28] == BASE_ADDR)
     begin
       data_add_int[31:28] = 4'b0001;
     end
     else if(data_add_int[31:28] == 4'b0001)
          begin
-            data_add_int[31:28] = base_addr;
+            data_add_int[31:28] = BASE_ADDR;
          end
          else
          begin

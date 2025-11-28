@@ -437,7 +437,6 @@ module dmac_wrap #(
       assign obi_read_req_from_dma[s/2].a.wdata = obi2axi_read_req_from_dma[s/2].a.wdata;
       assign obi_read_req_from_dma[s/2].rready  = obi2axi_read_req_from_dma[s/2].rready ;
 
-// #ifdef SYNTHESIS
       idma_backend_synth_r_obi_rw_init_w_axi #(
         .DataWidth           ( AXI_DATA_WIDTH   ),
         .AddrWidth           ( AXI_ADDR_WIDTH   ),
@@ -555,57 +554,6 @@ module dmac_wrap #(
         .init_write_rsp_ready_o ( init_write_req.rsp_ready            ),
         .idma_busy_o            ( idma_busy[s]                        )
       );
-// #else
-//       idma_backend_r_obi_rw_init_w_axi #(
-//         .DataWidth           (AXI_DATA_WIDTH),
-//         .AddrWidth           (AXI_ADDR_WIDTH),
-//         .UserWidth           (AXI_USER_WIDTH),
-//         .AxiIdWidth          (AXI_ID_WIDTH),
-//         .NumAxInFlight       (NB_OUTSND_BURSTS),
-//         .BufferDepth         (32'd3),
-//         .TFLenWidth          (TFLenWidth),
-//         .MemSysDepth         (32'd0),
-//         .CombinedShifter     (1'b0),
-//         .RAWCouplingAvail    (1'b0),
-//         .MaskInvalidData     (1'b0),
-//         .HardwareLegalizer   (1'b1),
-//         .RejectZeroTransfers (1'b1),
-//         .idma_req_t          (idma_req_t),
-//         .idma_rsp_t          (idma_rsp_t),
-//         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
-//         .idma_busy_t         (idma_pkg::idma_busy_t),
-//         .axi_req_t           (axi_req_t),
-//         .axi_rsp_t           (axi_resp_t),
-//         .init_req_t          (init_req_t),
-//         .init_rsp_t          (init_rsp_t),
-//         .obi_req_t           (obi_req_t),
-//         .obi_rsp_t           (obi_rsp_t),
-//         .read_meta_channel_t (read_meta_channel_t),
-//         .write_meta_channel_t(write_meta_channel_t)
-//       ) i_idma_backend_r_obi_rw_init_w_axi (
-//         .clk_i,
-//         .rst_ni,
-//         .testmode_i      (test_mode_i),
-//         .idma_req_i      (idma_req[s]),
-//         .req_valid_i     (be_valid[s]),
-//         .req_ready_o     (be_ready[s]),
-//         .idma_rsp_o      (idma_rsp[s]),
-//         .rsp_valid_o     (be_rsp_valid[s]),
-//         .rsp_ready_i     (be_rsp_ready[s]),
-//         .idma_eh_req_i   (1'b0),
-//         .eh_req_valid_i  (1'b0),
-//         .eh_req_ready_o  (  /* NOT CONNECTED */),
-//         .init_read_req_o (init_read_req),
-//         .init_read_rsp_i (init_read_rsp),
-//         .obi_read_req_o  (obi_read_req_from_dma[s/2]),
-//         .obi_read_rsp_i  (obi_read_rsp_to_dma[s/2]),
-//         .axi_write_req_o (dma_req[s]),
-//         .axi_write_rsp_i (dma_rsp[s]),
-//         .init_write_req_o(init_write_req),
-//         .init_write_rsp_i(init_write_rsp),
-//         .busy_o          (idma_busy[s])
-//       );
-// #endif
 
       // use a spill register to only give responses when a request was
       // (or is) asserted
@@ -717,7 +665,6 @@ module dmac_wrap #(
       assign obi_write_req_from_dma[s/2].a.wdata = obi2axi_write_req_from_dma[s/2].a.wdata;
       assign obi_write_req_from_dma[s/2].rready  = obi2axi_write_req_from_dma[s/2].rready ;
 
-// #ifdef SYNTHESIS
       idma_backend_synth_r_axi_rw_init_rw_obi #(
         .DataWidth           (AXI_DATA_WIDTH),
         .AddrWidth           (AXI_ADDR_WIDTH),
@@ -843,59 +790,6 @@ module dmac_wrap #(
 
         .idma_busy_o              ( idma_busy[s]                        )
       );
-// #else
-//       idma_backend_r_axi_rw_init_rw_obi #(
-//         .DataWidth           (AXI_DATA_WIDTH),
-//         .AddrWidth           (AXI_ADDR_WIDTH),
-//         .UserWidth           (AXI_USER_WIDTH),
-//         .AxiIdWidth          (AXI_ID_WIDTH),
-//         .NumAxInFlight       (NB_OUTSND_BURSTS),
-//         .BufferDepth         (32'd3),
-//         .TFLenWidth          (TFLenWidth),
-//         .MemSysDepth         (32'd0),
-//         .CombinedShifter     (1'b0),
-//         .RAWCouplingAvail    (1'b0),
-//         .MaskInvalidData     (1'b0),
-//         .HardwareLegalizer   (1'b1),
-//         .RejectZeroTransfers (1'b1),
-//         .idma_req_t          (idma_req_t),
-//         .idma_rsp_t          (idma_rsp_t),
-//         .idma_eh_req_t       (idma_pkg::idma_eh_req_t),
-//         .idma_busy_t         (idma_pkg::idma_busy_t),
-//         .axi_req_t           (axi_req_t),
-//         .axi_rsp_t           (axi_resp_t),
-//         .init_req_t          (init_req_t),
-//         .init_rsp_t          (init_rsp_t),
-//         .obi_req_t           (obi_req_t),
-//         .obi_rsp_t           (obi_rsp_t),
-//         .read_meta_channel_t (read_meta_channel_t),
-//         .write_meta_channel_t(write_meta_channel_t)
-//       ) i_idma_backend_r_axi_rw_init_rw_obi (
-//         .clk_i,
-//         .rst_ni,
-//         .testmode_i      (test_mode_i),
-//         .idma_req_i      (idma_req[s]),
-//         .req_valid_i     (be_valid[s]),
-//         .req_ready_o     (be_ready[s]),
-//         .idma_rsp_o      (idma_rsp[s]),
-//         .rsp_valid_o     (be_rsp_valid[s]),
-//         .rsp_ready_i     (be_rsp_ready[s]),
-//         .idma_eh_req_i   (1'b0),
-//         .eh_req_valid_i  (1'b0),
-//         .eh_req_ready_o  (  /* NOT CONNECTED */),
-//         .axi_read_req_o  (dma_req[s]),
-//         .axi_read_rsp_i  (dma_rsp[s]),
-//         .init_read_req_o (init_read_req),
-//         .init_read_rsp_i (init_read_rsp),
-//         .obi_read_req_o  (obi_reorg_req_from_dma[s/2]),
-//         .obi_read_rsp_i  (obi_reorg_rsp_to_dma[s/2]),
-//         .init_write_req_o(init_write_req),
-//         .init_write_rsp_i(init_write_rsp),
-//         .obi_write_req_o (obi_write_req_from_dma[s/2]),
-//         .obi_write_rsp_i (obi_write_rsp_to_dma[s/2]),
-//         .busy_o          (idma_busy[s])
-//       );
-// #endif
 
       // use a spill register to only give responses when a request was
       // (or is) asserted

@@ -592,7 +592,7 @@ module pulp_cluster_tb;
     wait (s_rstn);
 
     // Wait until the probe is high
-    while (!cluster_i.dmac_wrap_i.busy_o)
+    while (!s_cluster_fetch_en)
       @(posedge s_clk);
 
      if ( $value$plusargs ("VCD_DUMP_FILE=%s", vcd_dump_file));
@@ -603,7 +603,7 @@ module pulp_cluster_tb;
     $dumpon;
 
     // Wait until the probe is low
-    while (cluster_i.dmac_wrap_i.busy_o)
+    while (s_cluster_fetch_en)
       @(posedge s_clk);
 
     $dumpoff;

@@ -83,7 +83,7 @@ sw-clean:
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 093ec1f # branch: new_iDMA_tests
+PULP_RUNTIME_COMMIT ?= ad6690b0f03e8f8559606cc907125914de4b0873 # branch: new_iDMA_tests
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
@@ -119,8 +119,12 @@ sim-clean:
 include bender-common.mk
 include bender-sim.mk
 scripts/compile.tcl: | Bender.lock
-	$(call generate_vsim, $@, $(common_defs) $(common_targs) $(sim_defs) $(sim_targs),..)
+	$(call generate_vsim, $@, $(common_defs) $(common_targs) -t idma $(sim_defs) $(sim_targs),..)
 	echo 'vlog "$(realpath $(ROOT_DIR))/tb/dpi/elfloader.cpp" -ccflags "-std=c++11"' >> $@
+
+scripts/compile.tcl-mchan: | Bender.lock
+	$(call generate_vsim, scripts/compile.tcl, $(common_defs) $(common_targs) -t mchan $(sim_defs) $(sim_targs),..)
+	echo 'vlog "$(realpath $(ROOT_DIR))/tb/dpi/elfloader.cpp" -ccflags "-std=c++11"' >> scripts/compile.tcl
 
 include bender-synth.mk
 scripts/synth-compile.tcl: | Bender.lock

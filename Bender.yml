@@ -57,7 +57,7 @@ sources:
   - target: mchan
     files:
       - rtl/mchan_wrap.sv
-  - target: not(mchan)
+  - target: idma
     files:
       - rtl/idma_wrap.sv
   - rtl/hwpe_subsystem.sv

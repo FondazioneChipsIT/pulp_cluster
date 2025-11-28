@@ -350,10 +350,8 @@ module pulp_cluster_tb;
     default: '0
   };
 
-`ifdef CLUSTER_NETLIST
-  pulp_cluster_wrap
-`else
   pulp_cluster
+`ifndef CLUSTER_NETLIST
 `ifdef USE_PULP_PARAMETERS
   #(
     .Cfg ( PulpClusterCfg )
@@ -594,7 +592,7 @@ module pulp_cluster_tb;
     wait (s_rstn);
 
     // Wait until the probe is high
-    while (!s_cluster_fetch_en)
+    while (!cluster_i.dmac_wrap_i.busy_o)
       @(posedge s_clk);
 
      if ( $value$plusargs ("VCD_DUMP_FILE=%s", vcd_dump_file));
@@ -605,7 +603,7 @@ module pulp_cluster_tb;
     $dumpon;
 
     // Wait until the probe is low
-    while (s_cluster_fetch_en)
+    while (cluster_i.dmac_wrap_i.busy_o)
       @(posedge s_clk);
 
     $dumpoff;

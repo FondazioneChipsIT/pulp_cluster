@@ -14,7 +14,7 @@
 //              the virtual interfaces and starts the test passed by +UVM_TEST+
 //`define TEST_CLOCK_BYPASS
 
-`timescale 1ps/1ps
+`timescale 1ns/1ps
 
 `include "pulp_soc_defines.sv"
 `include "axi/assign.svh"
@@ -35,9 +35,9 @@ module pulp_cluster_tb;
   logic s_rstn;
   logic s_rstn_cl;
 
-  localparam time SYS_TCK  = 8ns;
-  localparam time SYS_TA   = 2ns;
-  localparam time SYS_TT   = SYS_TCK - 2ns;
+  localparam time SYS_TCK  = 2ns;
+  localparam time SYS_TA   = 0.5ns;
+  localparam time SYS_TT   = SYS_TCK - 0.5ns;
 
   clk_rst_gen #(
     .ClkPeriod    ( SYS_TCK ),
@@ -592,7 +592,7 @@ module pulp_cluster_tb;
     wait (s_rstn);
 
     // Wait until the probe is high
-    while (!s_cluster_fetch_en)
+    while (!cluster_i.dmac_wrap_i.busy_o)
       @(posedge s_clk);
 
      if ( $value$plusargs ("VCD_DUMP_FILE=%s", vcd_dump_file));
@@ -603,7 +603,7 @@ module pulp_cluster_tb;
     $dumpon;
 
     // Wait until the probe is low
-    while (s_cluster_fetch_en)
+    while (cluster_i.dmac_wrap_i.busy_o)
       @(posedge s_clk);
 
     $dumpoff;

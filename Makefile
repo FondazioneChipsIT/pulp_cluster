@@ -51,6 +51,18 @@ nonfree-init:
 	git clone $(NONFREE_REMOTE) nonfree
 	cd nonfree && git checkout $(NONFREE_COMMIT)
 
+###################
+# Tech repository #
+###################
+
+TECH_REMOTE ?= git@gitlab.chips.it:digitalresearchline/referencedesignflow/gf22/pulp_cluster.git
+TECH_COMMIT ?= 70c4b6e9511172464af85ad5d851b5434aa08a77
+
+tech-init:
+	git clone $(TECH_REMOTE) gf22
+	$(MAKE) -C gf22 init
+
+
 ################
 # Dependencies #
 ################

@@ -89,6 +89,14 @@ pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
 	cd $@ && git checkout $(PULP_RUNTIME_COMMIT)
 
+## Clone pulp-sdk as SW stack
+PULP_SDK_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
+PULP_SDK_COMMIT ?= 58b29e8696518c9fb1877086837b30a6367ee259 # branch: new_iDMA_tests
+
+pulp-sdk:
+	git clone $(PULP_SDK_REMOTE) $@
+	cd $@ && git checkout $(PULP_SDK_COMMIT)
+
 ## Clone fault injection scripts
 FAULT_SIM_REMOTE ?= https://github.com/pulp-platform/InjectaFault.git
 FAULT_SIM_COMMIT ?= 84ddcff # branch: rt/rename-var

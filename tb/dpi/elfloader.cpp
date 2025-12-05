@@ -294,6 +294,7 @@ extern "C" char read_elf(const char *filename)
 {
   char *buf = NULL;
   Elf64_Ehdr* eh64 = NULL;
+  printf("PWD = %s\n", getcwd(NULL, 0));
   int fd = open(filename, O_RDONLY);
   printf ("Filename for elf is %s \n", filename);
   char retval = 0;

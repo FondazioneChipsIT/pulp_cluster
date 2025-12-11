@@ -192,6 +192,17 @@ module dmac_wrap #(
 
   // connect RW axi buses
   for (genvar s = 0; s < NUM_BIDIR_STREAMS; s++) begin : gen_rw_axi_connection
+
+    assign dma_req[2*s].ar = '0;
+    assign dma_req[2*s].ar_valid = '0;
+    assign dma_req[2*s].r_ready = '0;
+
+    assign dma_req[2*s+1].aw = '0;
+    assign dma_req[2*s+1].aw_valid = '0;
+    assign dma_req[2*s+1].w = '0;
+    assign dma_req[2*s+1].w_valid = '0;
+    assign dma_req[2*s+1].b_ready = '0;
+
     axi_rw_join #(
       .axi_req_t (axi_req_t),
       .axi_resp_t(axi_resp_t)

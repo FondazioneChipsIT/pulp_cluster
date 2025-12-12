@@ -25,7 +25,7 @@ dependencies:
   cluster_peripherals:    { git: "https://github.com/pulp-platform/cluster_peripherals.git", rev: v2.2.0 }
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: 0.39.3  }
   timer_unit:             { git: "https://github.com/pulp-platform/timer_unit.git", version: 1.0.2 }
-  common_cells:           { git: "https://github.com/FondazioneChipsIT/common_cells.git", version: 286ffd49d9ed3409ceaef7c7fe98516e2611a1a9 } # gl/fix_define
+  common_cells:           { git: "https://github.com/FondazioneChipsIT/common_cells.git", rev: 286ffd49d9ed3409ceaef7c7fe98516e2611a1a9 } # gl/fix_define
   tech_cells_generic:     { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
   flex-v:                 { git: "https://github.com/FondazioneChipsIT/flex-v.git", rev: f22937733fd058550ef847ddbf1381e821f0f9d2 } # gl/fix_pkg_import
   cv32e40p:               { git: "https://github.com/pulp-platform/cv32e40p.git", rev: astral-v1.0 }

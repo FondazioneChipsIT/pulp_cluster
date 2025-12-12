@@ -4,5 +4,5 @@
 
 synth_defs :=
 
-# Don't add the following for linting
 synth_targs := -t pulp_standalone_synth
+synth_targs += -t idma

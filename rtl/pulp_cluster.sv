@@ -499,9 +499,13 @@ hci_core_intf #(
   c2s_in_int_req_t s_core_ext_bus_req;
   c2s_in_int_resp_t s_core_ext_bus_resp;
 
-  // DMA -> ext
-  c2s_in_int_req_t s_dma_ext_bus_req;
-  c2s_in_int_resp_t s_dma_ext_bus_resp;
+  // DMA -> burst_splitter
+  c2s_in_int_req_t s_dma_to_burst_split_req;
+  c2s_in_int_resp_t s_dma_to_burst_split_resp;
+
+  // burst_splitter -> ext
+  c2s_in_int_req_t s_burst_split_to_ext_bus_req;
+  c2s_in_int_resp_t s_burst_split_to_ext_bus_resp;
 
   // ext -> axi2mem
   c2s_out_int_req_t s_ext_tcdm_bus_req;
@@ -562,8 +566,8 @@ cluster_bus_wrap #(
   .data_slave_resp_o   ( s_core_ext_bus_resp ),
   .instr_slave_req_i   ( s_core_instr_bus_req ),
   .instr_slave_resp_o  ( s_core_instr_bus_resp ),
-  .dma_slave_req_i     ( s_dma_ext_bus_req ),
-  .dma_slave_resp_o    ( s_dma_ext_bus_resp ),
+  .dma_slave_req_i     ( s_burst_split_to_ext_bus_req ),
+  .dma_slave_resp_o    ( s_burst_split_to_ext_bus_resp ),
   .ext_slave_req_i     ( s_data_slave_64_req ),
   .ext_slave_resp_o    ( s_data_slave_64_resp ),
   .tcdm_master_req_o   ( s_ext_tcdm_bus_req ),
@@ -702,6 +706,29 @@ cluster_interconnect_wrap #(
 );
 
 //***************************************************
+//*****************AXI BURST SPLITTER****************
+//***************************************************
+
+axi_burst_splitter #(
+  .MaxReadTxns  ( Cfg.DmaNumOutstandingBursts ),
+  .MaxWriteTxns ( Cfg.DmaNumOutstandingBursts ),
+  .FullBW       ( 0 ),
+  .AddrWidth    ( Cfg.AxiAddrWidth    ),
+  .DataWidth    ( Cfg.AxiDataOutWidth ),
+  .IdWidth      ( AxiIdInWidth        ),
+  .UserWidth    ( Cfg.AxiUserWidth    ),
+  .axi_req_t    ( c2s_in_int_req_t    ),
+  .axi_resp_t   ( c2s_in_int_resp_t   )
+) i_axi_burst_split (
+  .clk_i      ( clk_i  ),
+  .rst_ni     ( rst_ni ),
+  .slv_req_i  ( s_dma_to_burst_split_req  ),
+  .slv_resp_o ( s_dma_to_burst_split_resp ),
+  .mst_req_o  ( s_burst_split_to_ext_bus_req ),
+  .mst_resp_i ( s_burst_split_to_ext_bus_resp )
+);
+
+//***************************************************
 //*********************DMAC WRAP*********************
 //***************************************************
 dmac_wrap #(
@@ -736,8 +763,8 @@ dmac_wrap #(
   .ctrl_slave         ( s_core_dmactrl_bus               ),
   .tcdm_master        ( s_hci_dma                        ),
 
-  .ext_master_req_o   ( s_dma_ext_bus_req                ),
-  .ext_master_resp_i  ( s_dma_ext_bus_resp               ),
+  .ext_master_req_o   ( s_dma_to_burst_split_req         ),
+  .ext_master_resp_i  ( s_dma_to_burst_split_resp        ),
 
   .term_event_o       ( s_dma_event                      ),
   .term_irq_o         ( s_dma_irq                        ),

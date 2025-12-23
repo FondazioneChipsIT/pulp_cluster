@@ -32,6 +32,8 @@ module pulp_cluster_tb;
   import axi_pkg::*;
 
   logic s_clk;
+  logic clk, clk_ref;
+  logic clk_sel;
   logic s_rstn;
   logic s_rstn_cl;
 
@@ -39,13 +41,30 @@ module pulp_cluster_tb;
   localparam time SYS_TA   = 0.5ns;
   localparam time SYS_TT   = SYS_TCK - 0.5ns;
 
+  localparam time SYS_TCK_REF  = 10ns;
+
   clk_rst_gen #(
     .ClkPeriod    ( SYS_TCK ),
-    .RstClkCycles ( 5       )
+    .RstClkCycles ( 100       )
   ) i_clk_rst_gen (
-      .clk_o  ( s_clk  ),
-      .rst_no ( s_rstn )
+      .clk_o  ( clk  ),
+      .rst_no (  )
   );
+
+  clk_rst_gen #(
+    .ClkPeriod    ( SYS_TCK_REF ),
+    .RstClkCycles ( 100       )
+  ) i_clk_ref_rst_gen (
+      .clk_o  ( clk_ref  ),
+      .rst_no ( s_rstn   )
+  );
+
+  tc_clk_mux2 i_clk_mux (
+      .clk0_i    (clk),
+      .clk1_i    (clk_ref),
+      .clk_sel_i (clk_sel),
+      .clk_o     (s_clk)
+);
 
   localparam AxiAw  = 32;
   localparam AxiDw  = 64;
@@ -479,6 +498,8 @@ module pulp_cluster_tb;
 
   initial begin
 
+   assign clk_sel = 1;
+
    assign s_cluster_en_sa_boot = 1'b0;
    assign s_cluster_fetch_en = 1'b0;
    axi_master_drv.reset_master();
@@ -486,6 +507,8 @@ module pulp_cluster_tb;
 
    @(posedge s_rstn);
    @(posedge s_clk);
+
+   assign clk_sel = 0;
 
    if ( $value$plusargs ("APP=%s", binary));
      $display("[TB] Testing %s", binary);

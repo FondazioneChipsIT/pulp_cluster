@@ -292,7 +292,7 @@ module pulp_cluster_tb;
     NumCores: `NB_CORES,
     DmaNumPlugs: `NB_DMAS,
     DmaNumOutstandingBursts: 8,
-    DmaBurstLength: 256,
+    DmaBurstLength: 5,
     NumMstPeriphs: `NB_MPERIPHS,
     NumSlvPeriphs: `NB_SPERIPHS,
     ClusterAlias: 1,

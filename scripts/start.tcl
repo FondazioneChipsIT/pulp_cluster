@@ -1,14 +1,16 @@
-if {![info exists VSIM_PATH ]} {
-    return -code error -errorinfo "[ERRORINFO] You must set the \"VSIM_PATH\" variable before sourcing the start script."
+if {![info exists ::env(VSIM_PATH) ]} {
+    error "You must set the \"VSIM_PATH\" variable before sourcing the start script."
     set VSIM_PATH ""
 }
 
-if {[info exists USE_QONE] && $USE_QONE == 1} {
-    set QSIM qsim
-    $QSIM -qwavedb=+signal+memory +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $VSIM_PATH/work +APP=./build/test/test +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++./build/test/test
+if {![info exists APP]} {
+    set APP "./test/test"
+}
+
+if {[info exists env(USE_QONE)] && $::env(USE_QONE) == 1} {
+    qsim -qwavedb=+signal+memory +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $::env(VSIM_PATH)/work +APP=$APP +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++$APP
 } else {
-    set VSIM vsim
-    $VSIM +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $VSIM_PATH/work +APP=./BUILD/PULP/GCC_RISCV/test/test +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++./BUILD/PULP/GCC_RISCV/test/test
+    vsim +permissive -suppress 3053 -suppress 8885 -suppress 12130 -lib $::env(VSIM_PATH)/work +APP=$APP +notimingchecks +nospecify  -t 1ps  pulp_cluster_tb_optimized +permissive-off ++$APP
 }
 
 if {[info exists ::env(FAULT_INJECTION)]} {

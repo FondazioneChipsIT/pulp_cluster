@@ -182,7 +182,7 @@ module pulp_cluster_tb;
    .AxiDw   ( AxiDw         ),
    .AxiUw   ( AxiUw         ),
    .N_CORES ( 8             ),
-   .BaseAddr( 32'h4000_0000 )
+   .BaseAddr( 32'h40000000 )
   ) i_mock_uart (
      .clk_i  ( s_clk         ),
      .rst_ni ( s_rstn        ),
@@ -202,8 +202,8 @@ module pulp_cluster_tb;
   rule_t [NumRules-1:0] addr_map;
   assign addr_map[0] = '{ // UART
     idx:        0,
-    start_addr: 'h03002000,
-    end_addr:   'h03003000
+    start_addr: 'h40001000,
+    end_addr:   'h40002000
   };
   assign addr_map[1] = '{ // 512KiB L2SPM
     idx:        1,

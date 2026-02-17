@@ -1,0 +1,3 @@
+[submodule "pulp-sdk"]
+	path = pulp-sdk
+	url = ./pulp-sdk/

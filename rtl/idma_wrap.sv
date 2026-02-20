@@ -273,48 +273,31 @@ module dmac_wrap #(
         Must be able to translate incoming transfer requests before the frontend
   */
 
-  logic idma_clk_enable;
-  logic busy_high, release_busy_high;
+logic keep_clock, clk_en;
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (rst_ni === 1'b0) begin
-      idma_clk_enable <= 1'b0; // gated by default
-      release_busy_high <= 1'b0;
-    end else if (one_fe_valid == 1'b1) begin
-// Start clocking the iDMA when the first valid request arrives
-      idma_clk_enable <= 1'b1;
-      release_busy_high <= 1'b0;
-    end else if ((busy_o == 1'b0) && (busy_high == 1'b1)) begin
-// Detect the fall transition on busy_o and wait on the last event before enabling the clock gating
-      if (|trans_complete) begin
-        idma_clk_enable <= 1'b0;
-        release_busy_high <= 1'b1;
-      end
-    end
-  end
+// Register to keep the clock active until event completion
 
-// The following register stores the info that a rising transition on busy_o has occurred.
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (rst_ni === 1'b0) begin
-      busy_high <= 1'b0;
-    end else if (busy_o == 1'b1) begin
-      // Save the info that busy_o went high
-      busy_high <= 1'b1;
-    end else if (release_busy_high == 1'b1) begin
-      // Put busy_high to 0
-      busy_high <= 1'b0;
-    end
+always_ff @(posedge clk_i, negedge rst_ni) begin
+  if (rst_ni == 1'b0) begin
+    keep_clock <= 1'b0;
+  end else if (busy_o == 1'b1) begin
+    keep_clock <= 1'b1;
+  end else if (|trans_complete) begin
+      keep_clock <= 1'b0;
   end
+end
+
+assign clk_en = busy_o | one_fe_valid | keep_clock;
 
   // ------------------------------------------------------
   // CLOCK GATING CELL
   // ------------------------------------------------------
 
   cluster_clock_gating idma_ckgate (
-    .clk_i      ( clk_i           ),
-    .en_i       ( idma_clk_enable ),
-    .test_en_i  ( test_mode_i     ),
-    .clk_o      ( clk_gated       )
+    .clk_i      ( clk_i       ),
+    .en_i       ( clk_en      ),
+    .test_en_i  ( test_mode_i ),
+    .clk_o      ( clk_gated   )
   );
 
 

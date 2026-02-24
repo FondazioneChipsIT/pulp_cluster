@@ -228,6 +228,8 @@ logic [Cfg.NumCores-1:0]                s_dbg_irq;
 logic                                   s_hwpe_en;
 logic [$clog2(MAX_NUM_HWPES)-1:0]       s_hwpe_sel;
 
+logic                     s_idma_cg_en;
+
 logic                     fetch_en_synch;
 logic                     en_sa_boot_synch;
 logic                     axi_isolate_synch;
@@ -740,6 +742,9 @@ dmac_wrap #(
   .ext_master_req_o   ( s_dma_ext_bus_req                ),
   .ext_master_resp_i  ( s_dma_ext_bus_resp               ),
 
+`ifdef TARGET_IDMA
+  .cluster_ctrl_cg_en ( s_idma_cg_en                     ),
+`endif
   .term_event_o       ( s_dma_event                      ),
   .term_irq_o         ( s_dma_irq                        ),
   .term_event_pe_o    ( {s_dma_fc_event, s_dma_cl_event} ),
@@ -826,6 +831,7 @@ cluster_peripherals #(
   .hwpe_events_i            ( s_hwpe_remap_evt                  ),
   .hwpe_en_o                ( s_hwpe_en                         ),
   .hwpe_sel_o               ( s_hwpe_sel                        ),
+  .idma_cg_en_o             ( s_idma_cg_en                      ),
   .hci_ctrl_o               ( s_hci_ctrl                        ),
   .enable_l1_l15_prefetch_o (  s_enable_l1_l15_prefetch         ),
   .flush_valid_o            ( s_icache_flush_valid              ),

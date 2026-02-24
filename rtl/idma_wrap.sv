@@ -55,6 +55,7 @@ module dmac_wrap #(
   hci_core_intf.initiator        tcdm_master[0:3],
   output                         axi_req_t [NUM_BIDIR_STREAMS-1:0] ext_master_req_o,
   input                          axi_resp_t [NUM_BIDIR_STREAMS-1:0] ext_master_resp_i,
+  input  logic                   cluster_ctrl_cg_en,
   output logic [NB_CORES-1:0]    term_event_o,
   output logic [NB_CORES-1:0]    term_irq_o,
   output logic [NB_PE_PORTS-1:0] term_event_pe_o,
@@ -210,7 +211,7 @@ module dmac_wrap #(
       .axi_req_t (axi_req_t),
       .axi_resp_t(axi_resp_t)
     ) i_init_axi_rw_join (
-      .clk_i ( clk_gated ),
+      .clk_i ( ctrl_clk_gated ),
       .rst_ni,
       .slv_read_req_i  (dma_req[2*s+1]),
       .slv_read_resp_o (dma_rsp[2*s+1]),
@@ -287,17 +288,34 @@ always_ff @(posedge clk_i, negedge rst_ni) begin
   end
 end
 
-assign clk_en = busy_o | one_fe_valid | keep_clock;
+// Clock gating for iDMA is controlled either internally:
+//     - frontend and periph_to_reg modules are kept clocked in order to detect incoming transfer requests
+// or externally:
+//     - the cluster_ctrl_cg_en signal comes directly from the cluster control unit and completely gates the iDMA wrap.
 
-  // ------------------------------------------------------
-  // CLOCK GATING CELL
-  // ------------------------------------------------------
+assign clk_en = (busy_o | one_fe_valid | keep_clock) & cluster_ctrl_cg_en;
 
-  cluster_clock_gating idma_ckgate (
-    .clk_i      ( clk_i       ),
-    .en_i       ( clk_en      ),
-    .test_en_i  ( test_mode_i ),
-    .clk_o      ( clk_gated   )
+  // // ----------------------------------------------------------------------------------------------------------
+  // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules
+  // // ----------------------------------------------------------------------------------------------------------
+
+  // cluster_clock_gating idma_datapath_ckgate (
+  //   .clk_i      ( clk_i       ),
+  //   .en_i       ( cluster_ctrl_cg_en      ),
+  //   .test_en_i  ( test_mode_i ),
+  //   .clk_o      ( clk_gated   )
+  // );
+
+  // ----------------------------------------------------------------------------------------------------------
+  // CONTROL CLOCK GATING CELL --> This clock gating cell handles the clock gating control signal coming from
+  //                               the cluster control unit, completely disabling the clock in the idma wrapper
+  // ----------------------------------------------------------------------------------------------------------
+
+  cluster_clock_gating idma_ctrl_ckgate (
+    .clk_i      ( clk_i              ),
+    .en_i       ( cluster_ctrl_cg_en ),
+    .test_en_i  ( test_mode_i        ),
+    .clk_o      ( ctrl_clk_gated     )
   );
 
 
@@ -314,7 +332,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       .req_t(dma_regs_req_t),
       .rsp_t(dma_regs_rsp_t)
     ) i_pe_translate (
-      .clk_i    ( clk_i   ),
+      .clk_i    ( ctrl_clk_gated   ),
       .rst_ni,
       .req_i    (config_req[i]),
       .add_i    (config_add[i][RegAddrWidth-1:0]),
@@ -340,7 +358,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
     .reg_rsp_t     (dma_regs_rsp_t),
     .dma_req_t     (idma_nd_req_t)
   ) i_idma_reg32_3d (
-    .clk_i         ( clk_i  ),
+    .clk_i         ( ctrl_clk_gated  ),
     .rst_ni,
     .dma_ctrl_req_i(dma_regs_req),
     .dma_ctrl_rsp_o(dma_regs_rsp),
@@ -377,7 +395,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
     idma_transfer_id_gen #(
       .IdWidth(ID_WIDTH)
     ) i_idma_transfer_id_gen (
-      .clk_i      ( clk_gated ),
+      .clk_i      ( ctrl_clk_gated ),
       .rst_ni,
       .issue_i    (fe_valid[s] & fe_ready[s]),
       .retire_i   (trans_complete[s]),
@@ -394,7 +412,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       .DEPTH(GLOBAL_QUEUE_DEPTH),
       .T    (idma_nd_req_t)
     ) i_3D_request_fifo (
-      .clk_i     ( clk_gated ),
+      .clk_i     ( ctrl_clk_gated ),
       .rst_ni,
       .flush_i   (1'b0),
       .testmode_i(test_mode_i),
@@ -417,7 +435,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       .idma_nd_req_t(idma_nd_req_t),
       .RepWidths    (RepWidths)
     ) i_idma_3D_midend (
-      .clk_i            ( clk_gated       ),
+      .clk_i            ( ctrl_clk_gated       ),
       .rst_ni,
       .nd_req_i         (twod_req_queue[s]),
       .nd_req_valid_i   (twod_queue_valid[s]),
@@ -508,7 +526,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .ErrorHandling       ( 1'b0              ),
         .Burst_len           ( IDMA_BURST_LENGTH )
       ) i_idma_backend_r_obi_rw_init_w_axi (
-        .clk_i              ( clk_gated                               ),
+        .clk_i              ( ctrl_clk_gated                               ),
         .rst_ni             ( rst_ni                                  ),
         .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
@@ -615,7 +633,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       spill_register #(
         .T(logic)
       ) i_init_read_rsp_reflect (
-        .clk_i  ( clk_gated ),
+        .clk_i  ( ctrl_clk_gated ),
         .rst_ni,
         .valid_i(init_read_req.req_valid),
         .ready_o(init_read_rsp.req_ready),
@@ -631,7 +649,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       spill_register #(
         .T(logic)
       ) i_init_write_rsp_reflect (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .valid_i(init_write_req.req_valid),
         .ready_o(init_write_rsp.req_ready),
@@ -736,7 +754,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .RejectZeroTransfers (1'b1),
         .ErrorHandling       (1'b0)
       ) i_idma_backend_r_axi_rw_init_rw_obi (
-        .clk_i              ( clk_gated                               ),
+        .clk_i              ( ctrl_clk_gated                               ),
         .rst_ni             ( rst_ni                                  ),
         .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
@@ -851,7 +869,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       spill_register #(
         .T(logic)
       ) i_init_read_rsp_reflect (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .valid_i(init_read_req.req_valid),
         .ready_o(init_read_rsp.req_ready),
@@ -866,7 +884,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       spill_register #(
         .T(logic)
       ) i_init_write_rsp_reflect (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .valid_i(init_write_req.req_valid),
         .ready_o(init_write_rsp.req_ready),
@@ -911,7 +929,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .NumMaxTrans         ( 2             ),
         .UseIdForRouting     ( 1'b0          )
       ) obi_read_mux_i (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .testmode_i     (test_mode_i),
         .sbr_ports_req_i({obi_reorg_req_from_dma[s], obi_read_req_from_dma[s]}),
@@ -931,7 +949,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .obi_r_chan_t(obi_r_chan_t),
         .Depth(1)
       ) obi_rready_converter_reorg_i (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .test_mode_i,
         .sbr_a_chan_i  ( obi_reorg_req_from_dma[s].a       ),
@@ -956,7 +974,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       .obi_r_chan_t(obi_r_chan_t),
       .Depth(1)
     ) obi_rready_converter_read_i (
-      .clk_i ( clk_gated ),
+      .clk_i ( ctrl_clk_gated ),
       .rst_ni,
       .test_mode_i,
       .sbr_a_chan_i  ( obi_read_req_muxed[s].a        ),
@@ -981,7 +999,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
       .obi_r_chan_t(obi_r_chan_t),
       .Depth(1)
     ) obi_rready_converter_wr_i (
-      .clk_i ( clk_gated ),
+      .clk_i ( ctrl_clk_gated ),
       .rst_ni,
       .test_mode_i,
       .sbr_a_chan_i  ( obi_write_req_from_dma[s].a       ),
@@ -1029,7 +1047,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .MaxTrans (32'd1),
         .FifoDepth(32'd1)
       ) i_mem_to_banks_write (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .req_i         ( obi_write_req_from_rrc[s].req                                                                     ),
         .gnt_o         ( obi_write_rsp_to_rrc[s].gnt                                                                       ),
@@ -1070,7 +1088,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
         .MaxTrans (32'd1),
         .FifoDepth(32'd1)
       ) i_mem_to_banks_read (
-        .clk_i ( clk_gated ),
+        .clk_i ( ctrl_clk_gated ),
         .rst_ni,
         .req_i         ( obi_read_req_from_rrc[s].req                                                                        ),
         .gnt_o         ( obi_read_rsp_to_rrc[s].gnt                                                                          ),
@@ -1119,7 +1137,7 @@ assign clk_en = busy_o | one_fe_valid | keep_clock;
           .MaxTrans (32'd1),
           .FifoDepth(32'd1)
         ) i_mem_to_banks_reorg (
-          .clk_i ( clk_gated ),
+          .clk_i ( ctrl_clk_gated ),
           .rst_ni,
           .req_i         ( obi_reorg_req_from_rrc[s].req                                                                     ),
           .gnt_o         ( obi_reorg_rsp_to_rrc[s].gnt                                                                       ),

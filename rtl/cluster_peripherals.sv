@@ -102,7 +102,7 @@ module cluster_peripherals
   input logic [NB_CORES-1:0][3:0]     hwpe_events_i,
   output logic                        hwpe_en_o,
   output logic [$clog2(NB_HWPES)-1:0] hwpe_sel_o,
-  output logic                        idma_cg_en_o,
+  output logic                        idma_en_o,
   output hci_package::hci_interconnect_ctrl_t hci_ctrl_o,
 
   // Control ports
@@ -193,7 +193,7 @@ module cluster_peripherals
     .hwpe_sel_o     ( hwpe_sel_o                   ),
     .hci_ctrl_o     ( hci_ctrl_o                   ),
 
-    .idma_cg_en_o   ( idma_cg_en_o                 ),
+    .idma_en_o   ( idma_en_o                 ),
 
     .fregfile_disable_o ( fregfile_disable_o       ),
 

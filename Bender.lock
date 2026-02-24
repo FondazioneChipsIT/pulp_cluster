@@ -63,7 +63,7 @@ packages:
     dependencies:
     - common_cells
   cluster_peripherals:
-    revision: 1d34283e6958cea76ba2a05fe3581da58d8af7fe
+    revision: 6e55d0a74ff33ce9aac9fcd44ad702f323ace644
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/cluster_peripherals.git

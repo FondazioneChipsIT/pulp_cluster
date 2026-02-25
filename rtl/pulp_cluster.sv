@@ -704,6 +704,26 @@ cluster_interconnect_wrap #(
 );
 
 //***************************************************
+//****************iDMA Clock Gating******************
+//***************************************************
+//*****************************************************
+// CONTROL CLOCK GATING CELL --> This clock gating cell
+// handles the clock gating control signal coming from
+// the cluster control unit, completely disabling the
+// clock in the idma wrapper
+//*****************************************************
+
+`ifdef TARGET_IDMA
+logic idma_clk_gated;
+cluster_clock_gating idma_ctrl_ckgate (
+    .clk_i      ( clk_i          ),
+    .en_i       ( s_idma_en      ),
+    .test_en_i  ( test_mode_i    ),
+    .clk_o      ( idma_clk_gated )
+  );
+`endif
+
+//***************************************************
 //*********************DMAC WRAP*********************
 //***************************************************
 dmac_wrap #(
@@ -732,7 +752,11 @@ dmac_wrap #(
   .IDMA_BURST_LENGTH  ( Cfg.DmaBurstLength          )
 `endif
 ) dmac_wrap_i     (
+`ifdef TARGET_IDMA
+  .clk_i              ( idma_clk_gated                   ),
+`else
   .clk_i              ( clk_i                            ),
+`endif
   .rst_ni             ( rst_ni                           ),
   .test_mode_i        ( test_mode_i                      ),
   .pe_ctrl_slave      ( s_periph_dma_bus[1:0]            ),
@@ -742,9 +766,6 @@ dmac_wrap #(
   .ext_master_req_o   ( s_dma_ext_bus_req                ),
   .ext_master_resp_i  ( s_dma_ext_bus_resp               ),
 
-`ifdef TARGET_IDMA
-  .idma_en_i          ( s_idma_en                     ),
-`endif
   .term_event_o       ( s_dma_event                      ),
   .term_irq_o         ( s_dma_irq                        ),
   .term_event_pe_o    ( {s_dma_fc_event, s_dma_cl_event} ),

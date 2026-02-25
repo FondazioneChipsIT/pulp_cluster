@@ -55,7 +55,6 @@ module dmac_wrap #(
   hci_core_intf.initiator        tcdm_master[0:3],
   output                         axi_req_t [NUM_BIDIR_STREAMS-1:0] ext_master_req_o,
   input                          axi_resp_t [NUM_BIDIR_STREAMS-1:0] ext_master_resp_i,
-  input  logic                   idma_en_i,
   output logic [NB_CORES-1:0]    term_event_o,
   output logic [NB_CORES-1:0]    term_irq_o,
   output logic [NB_PE_PORTS-1:0] term_event_pe_o,
@@ -80,7 +79,7 @@ module dmac_wrap #(
   logic [NumRegs-1:0]                  config_r_opc;
   logic [NumRegs-1:0][PE_ID_WIDTH-1:0] config_r_id;
 
-  logic ctrl_clk_gated, datapath_clk_gated;
+  logic datapath_clk_gated;
 
   // tie-off pe control ports
   for (genvar i = 0; i < NB_CORES; i++) begin : gen_ctrl_registers
@@ -266,13 +265,11 @@ module dmac_wrap #(
   // CLOCK GATING CONTROL LOGIC
   // ------------------------------------------------------
 
-  /* 
-    Clock gating is performed on all the iDMA datapath except for:
-      iDMA_frontend:
-        Must be able to detect incoming transfer requests
-      iDMA_periph_to_reg:
-        Must be able to translate incoming transfer requests before the frontend
-  */
+  // A first level of clock gating is performed at cluster level:
+  //    - the clock for the whole iDMA wrapper can be controlled via sw through the cluster control unit.
+  //      By disabling it, iDMA becomes unresponsive to incoming requests.
+  // Here, another clock gating level is applied:
+  //    - completely hw-controlled, this clock gating cell controls the datapath clock, disabling it when not needed.
 
   logic keep_datapath_clocked, datapath_clk_en;
 
@@ -292,12 +289,7 @@ module dmac_wrap #(
     end
   end
 
-  // Clock gating for iDMA is controlled either internally:
-  //     - frontend and periph_to_reg modules are kept clocked in order to detect incoming transfer requests
-  // or externally:
-  //     - the idma_en_i signal comes directly from the cluster control unit and completely gates the iDMA wrap.
-
-  assign datapath_clk_en = (one_fe_valid | busy_o | (|trans_complete) | keep_datapath_clocked) & idma_en_i;
+  assign datapath_clk_en = (one_fe_valid | (|trans_complete) | keep_datapath_clocked);
 
   // // ----------------------------------------------------------------------------------------------------------
   // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules
@@ -309,19 +301,6 @@ module dmac_wrap #(
     .test_en_i  ( test_mode_i        ),
     .clk_o      ( datapath_clk_gated )
   );
-
-  // ----------------------------------------------------------------------------------------------------------
-  // CONTROL CLOCK GATING CELL --> This clock gating cell handles the clock gating control signal coming from
-  //                               the cluster control unit, completely disabling the clock in the idma wrapper
-  // ----------------------------------------------------------------------------------------------------------
-
-  cluster_clock_gating idma_ctrl_ckgate (
-    .clk_i      ( clk_i          ),
-    .en_i       ( idma_en_i      ),
-    .test_en_i  ( test_mode_i    ),
-    .clk_o      ( ctrl_clk_gated )
-  );
-
 
   // ------------------------------------------------------
   // FRONTEND
@@ -336,7 +315,7 @@ module dmac_wrap #(
       .req_t(dma_regs_req_t),
       .rsp_t(dma_regs_rsp_t)
     ) i_pe_translate (
-      .clk_i    ( ctrl_clk_gated   ),
+      .clk_i    ( clk_i ),
       .rst_ni,
       .req_i    (config_req[i]),
       .add_i    (config_add[i][RegAddrWidth-1:0]),
@@ -362,7 +341,7 @@ module dmac_wrap #(
     .reg_rsp_t     (dma_regs_rsp_t),
     .dma_req_t     (idma_nd_req_t)
   ) i_idma_reg32_3d (
-    .clk_i         ( ctrl_clk_gated  ),
+    .clk_i         ( clk_i ),
     .rst_ni,
     .dma_ctrl_req_i(dma_regs_req),
     .dma_ctrl_rsp_o(dma_regs_rsp),

@@ -83,7 +83,7 @@ sw-clean:
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 55fdd057ec176bf4eb9a6fcceb5a0b976d01a65d # branch: rg/add_iDMA_cg_drivers
+PULP_RUNTIME_COMMIT ?= 9bd23d2b2b6b6c74fc26a3ab3402fbebc589dace # branch: chips-it
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
@@ -99,7 +99,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= f1e8e193b45eb56bcad3a76aea7e5a1438d104d3 # branch: rg/test_idma_clock_gating
+REGRESSION_TESTS_COMMIT ?= dd41d893ee371df7407ce2c0128d2d3a45c4ec71 # branch: chips-it
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@

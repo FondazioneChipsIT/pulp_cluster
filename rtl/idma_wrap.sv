@@ -277,6 +277,10 @@ module dmac_wrap #(
   logic keep_datapath_clocked, datapath_clk_en;
 
   // Register to keep the clock active until event completion
+  //    Once the transfer has started its execution (busy_o == 1'b1)
+  //    the datapath needs to be clocked until the completion event
+  //    has been received (|trans_complete). Then the datapath
+  //    can be gated again.
 
   always_ff @(posedge clk_i, negedge rst_ni) begin
     if (rst_ni == 1'b0) begin
@@ -293,17 +297,17 @@ module dmac_wrap #(
   // or externally:
   //     - the idma_en_i signal comes directly from the cluster control unit and completely gates the iDMA wrap.
 
-  assign datapath_clk_en = (busy_o | one_fe_valid | keep_datapath_clocked) & idma_en_i;
+  assign datapath_clk_en = (one_fe_valid | busy_o | (|trans_complete) | keep_datapath_clocked) & idma_en_i;
 
   // // ----------------------------------------------------------------------------------------------------------
   // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules
   // // ----------------------------------------------------------------------------------------------------------
 
   cluster_clock_gating idma_datapath_ckgate (
-    .clk_i      ( clk_i           ),
-    .en_i       ( datapath_clk_en ),
-    .test_en_i  ( test_mode_i     ),
-    .clk_o      ( datapath_clk_gated       )
+    .clk_i      ( clk_i              ),
+    .en_i       ( datapath_clk_en    ),
+    .test_en_i  ( test_mode_i        ),
+    .clk_o      ( datapath_clk_gated )
   );
 
   // ----------------------------------------------------------------------------------------------------------
@@ -312,10 +316,10 @@ module dmac_wrap #(
   // ----------------------------------------------------------------------------------------------------------
 
   cluster_clock_gating idma_ctrl_ckgate (
-    .clk_i      ( clk_i       ),
-    .en_i       ( idma_en_i   ),
-    .test_en_i  ( test_mode_i ),
-    .clk_o      ( ctrl_clk_gated   )
+    .clk_i      ( clk_i          ),
+    .en_i       ( idma_en_i      ),
+    .test_en_i  ( test_mode_i    ),
+    .clk_o      ( ctrl_clk_gated )
   );
 
 

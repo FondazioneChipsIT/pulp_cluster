@@ -54,6 +54,7 @@ sources:
   - rtl/cluster_event_map.sv
   - rtl/cluster_timer_wrap.sv
   - rtl/obi_pulp_adapter.sv
+  - rtl/cluster_hmr_delay_chain.sv
   - target: mchan
     files:
       - rtl/mchan_wrap.sv

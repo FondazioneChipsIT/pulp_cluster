@@ -906,8 +906,8 @@ periph_to_reg #(
 
 core_data_req_t [Cfg.NumCores-1:0] core_data_req, demux_data_req;
 core_data_rsp_t [Cfg.NumCores-1:0] core_data_rsp, demux_data_rsp;
-core_inputs_t   [Cfg.NumCores-1:0] sys2hmr, hmr2core;
-core_outputs_t  [Cfg.NumCores-1:0] hmr2sys, core2hmr;
+core_inputs_t   [Cfg.NumCores-1:0] sys2hmr, hmr2core, hmr2core_delayed;
+core_outputs_t  [Cfg.NumCores-1:0] hmr2sys, core2hmr, core2hmr_delayed;
 core_backup_t   [Cfg.NumCores-1:0] backup_bus;
 rapid_recovery_pkg::rapid_recovery_t [Cfg.NumCores-1:0] recovery_bus;
 
@@ -953,31 +953,31 @@ generate
       .core_data_req_t     ( core_data_req_t            ),
       .core_data_rsp_t     ( core_data_rsp_t            )
     ) core_region_i        (
-      .clk_i               ( clk_core[i]              ),
-      .rst_ni              ( rst_ni                   ),
-      .setback_i           ( setback[i]               ),
-      .cluster_id_i        ( hmr2core[i].cluster_id   ),
-      .core_id_i           ( hmr2core[i].core_id      ),
-      .clock_en_i          ( hmr2core[i].clock_en     ),
-      .fetch_en_i          ( fetch_en_int[i]          ),
-      .boot_addr_i         ( hmr2core[i].boot_addr    ),
-      .irq_id_i            ( hmr2core[i].irq_id       ),
-      .irq_ack_id_o        ( core2hmr[i].irq_ack_id   ),
-      .irq_req_i           ( hmr2core[i].irq_req      ),
-      .irq_ack_o           ( core2hmr[i].irq_ack      ),
-      .test_mode_i         ( test_mode_i              ),
-      .core_busy_o         ( core2hmr[i].core_busy    ),
+      .clk_i               ( clk_core[i]                      ),
+      .rst_ni              ( rst_ni                           ),
+      .setback_i           ( setback[i]                       ),
+      .cluster_id_i        ( hmr2core_delayed[i].cluster_id   ),
+      .core_id_i           ( hmr2core_delayed[i].core_id      ),
+      .clock_en_i          ( hmr2core_delayed[i].clock_en     ),
+      .fetch_en_i          ( fetch_en_int[i]                  ),
+      .boot_addr_i         ( hmr2core_delayed[i].boot_addr    ),
+      .irq_id_i            ( hmr2core_delayed[i].irq_id       ),
+      .irq_ack_id_o        ( core2hmr[i].irq_ack_id           ),
+      .irq_req_i           ( hmr2core_delayed[i].irq_req      ),
+      .irq_ack_o           ( core2hmr[i].irq_ack              ),
+      .test_mode_i         ( test_mode_i                      ),
+      .core_busy_o         ( core2hmr[i].core_busy            ),
       //instruction cache bind
-      .instr_req_o         ( core2hmr[i].instr_req    ),
-      .instr_gnt_i         ( hmr2core[i].instr_gnt    ),
-      .instr_addr_o        ( core2hmr[i].instr_addr   ),
-      .instr_r_rdata_i     ( hmr2core[i].instr_rdata  ),
-      .instr_r_valid_i     ( hmr2core[i].instr_rvalid ),
+      .instr_req_o         ( core2hmr[i].instr_req            ),
+      .instr_gnt_i         ( hmr2core_delayed[i].instr_gnt    ),
+      .instr_addr_o        ( core2hmr[i].instr_addr           ),
+      .instr_r_rdata_i     ( hmr2core_delayed[i].instr_rdata  ),
+      .instr_r_valid_i     ( hmr2core_delayed[i].instr_rvalid ),
       //debug unit bind
-      .debug_req_i         ( s_core_dbg_irq[i]         ),
-      .debug_halted_o      ( core2hmr[i].debug_halted  ),
-      .debug_havereset_o   ( dbg_core_havereset[i]     ),
-      .debug_running_o     ( dbg_core_running[i]       ),
+      .debug_req_i         ( s_core_dbg_irq[i]                ),
+      .debug_halted_o      ( core2hmr[i].debug_halted         ),
+      .debug_havereset_o   ( dbg_core_havereset[i]            ),
+      .debug_running_o     ( dbg_core_running[i]              ),
       .ext_perf_i          ( {s_icache_l0_events[i], ext_perf[i]} ),
       .core_data_req_o     ( core_data_req[i]          ),
       .core_data_rsp_i     ( core_data_rsp[i]          ),
@@ -1027,9 +1027,9 @@ generate
     assign core_busy[i]            = hmr2sys[i].core_busy;
 
     // Binding data interface from HMR to the core and vice versa
-    assign core_data_rsp[i].gnt     = hmr2core[i].data_gnt;
-    assign core_data_rsp[i].r_data  = hmr2core[i].data_rdata;
-    assign core_data_rsp[i].r_valid = hmr2core[i].data_rvalid;
+    assign core_data_rsp[i].gnt     = hmr2core_delayed[i].data_gnt;
+    assign core_data_rsp[i].r_data  = hmr2core_delayed[i].data_rdata;
+    assign core_data_rsp[i].r_valid = hmr2core_delayed[i].data_rvalid;
 
     assign core2hmr[i].data_req   = core_data_req[i].req;
     assign core2hmr[i].data_add   = core_data_req[i].add;
@@ -1158,10 +1158,36 @@ generate
       .enable_bus_vote_i      ( '0           ),
       .core_setback_o         ( setback      ),
       .core_inputs_o          ( hmr2core     ),
-      .core_nominal_outputs_i ( core2hmr     ),
+      .core_nominal_outputs_i ( core2hmr_delayed ),
       .core_bus_outputs_i     ( '0           ),
       .core_axi_outputs_i     ( '0           )
     );
+    
+    for (genvar i = 0; i < Cfg.NumCores; i++) begin
+      if (i < (Cfg.NumCores >> 1)) begin : gen_core2hmr_delay_chain
+        cluster_hmr_delay_chain #(
+          .NUM_DELAYS     ( 2              ),
+          .core_signals_t ( core_outputs_t )
+        ) i_core2hmr_delay_chain (
+          .clk_i,
+          .rst_ni,
+          .inputs   ( core2hmr[i]         ),
+          .outputs  ( core2hmr_delayed[i] )
+        );
+        assign hmr2core_delayed[i] = hmr2core[i]; // Cores from 0 to 3 don't have delays on inputs coming from HMR
+      end else begin : gen_hmr2core_delay_chain
+        cluster_hmr_delay_chain #(
+          .NUM_DELAYS     ( 2             ),
+          .core_signals_t ( core_inputs_t )
+        ) i_hmr2core_delay_chain (
+          .clk_i,
+          .rst_ni,
+          .inputs  ( hmr2core[i]         ),
+          .outputs ( hmr2core_delayed[i] )
+        );
+        assign core2hmr_delayed[i] = core2hmr[i]; // Cores from 4 to 7 don't have delays on outputs going to HMR
+      end
+    end
 
     `ifndef VERILATOR
     initial begin: p_assertions
@@ -1193,6 +1219,8 @@ generate
       assign hmr2core[i].irq_req      = sys2hmr[i].irq_req;
       assign hmr2core[i].irq_id       = sys2hmr[i].irq_id;
 
+      assign hmr2core_delayed[i] = hmr2core[i];
+
       assign hmr2sys[i].instr_req     = core2hmr[i].instr_req;
       assign hmr2sys[i].instr_addr    = core2hmr[i].instr_addr;
       assign hmr2sys[i].data_req      = core2hmr[i].data_req;
@@ -1204,6 +1232,8 @@ generate
       assign hmr2sys[i].irq_ack_id    = core2hmr[i].irq_ack_id;
       assign hmr2sys[i].core_busy     = core2hmr[i].core_busy;
       assign hmr2sys[i].debug_halted  = core2hmr[i].debug_halted;
+
+      assign core2hmr_delayed[i] = core2hmr[i];
     end
   end
 endgenerate

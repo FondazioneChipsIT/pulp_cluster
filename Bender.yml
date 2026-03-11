@@ -20,7 +20,7 @@ dependencies:
   mchan:                  { git: "https://github.com/pulp-platform/mchan.git", version: =1.2.4 }
   idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: ChipsIt-v0.0.0 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
-  hier-icache:            { git: "https://github.com/FondazioneChipsIT/hier-icache.git", rev: 416c5cbc7b9b8724a40da6ac6d0b19a9c6b864bc } # gl/fix_define
+  hier-icache:            { git: "https://github.com/FondazioneChipsIT/hier-icache.git", rev: 0d0faeaf19b97a8f9a88cb8eba4db4703b0002ed } # rg/pulp_vcu118
   cluster_icache:         { git: "https://github.com/FondazioneChipsIT/cluster_icache.git", rev: 57ffb22066171d89974bdec240bad13f5efac9de } # gl/fix_define
   cluster_peripherals:    { git: "https://github.com/FondazioneChipsIT/cluster_peripherals.git", rev: "6e55d0a74ff33ce9aac9fcd44ad702f323ace644" } # rg/idma_clock_gating
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: =0.39.8  }
@@ -31,7 +31,7 @@ dependencies:
   cv32e40p:               { git: "https://github.com/pulp-platform/cv32e40p.git", rev: astral-v1.0 }
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git", rev: "pulpissimo-v6.1.2" }
   scm:                    { git: "https://github.com/pulp-platform/scm.git", version: =1.2.0 }
-  hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: 3e63936991569d0b1e315d6914478937b37bb338 }
+  hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: 362be08237fb64feeb12b1c7adc1d322b5373a3a } # rg/pulp_vcu118
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git", version: =0.4.7  }
   redundancy_cells:       { git: "https://github.com/pulp-platform/redundancy_cells.git", rev: 6ba6f41 } # yt/redmule-v2
   redmule:                { git: "https://github.com/pulp-platform/redmule.git", version: =2.0.4 }

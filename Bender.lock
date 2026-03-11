@@ -129,7 +129,7 @@ packages:
     dependencies:
     - common_cells
   hci:
-    revision: 3e63936991569d0b1e315d6914478937b37bb338
+    revision: 362be08237fb64feeb12b1c7adc1d322b5373a3a
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/hci.git
@@ -141,7 +141,7 @@ packages:
     - redundancy_cells
     - register_interface
   hier-icache:
-    revision: 416c5cbc7b9b8724a40da6ac6d0b19a9c6b864bc
+    revision: 0d0faeaf19b97a8f9a88cb8eba4db4703b0002ed
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/hier-icache.git

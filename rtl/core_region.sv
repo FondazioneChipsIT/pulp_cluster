@@ -171,7 +171,7 @@ import rapid_recovery_pkg::*;
         .pulp_clock_en_i       ( clock_en_i                  ),
         .scan_cg_en_i          ( test_mode_i                 ),
         .boot_addr_i           ( boot_addr                   ),
-        .mtvec_addr_i          ( '0                          ),
+        .mtvec_addr_i          ( 32'h1c008000                ),
         .dm_halt_addr_i        ( DEBUG_START_ADDR + 16'h0800 ),
         .hart_id_i             ( hart_id                     ),
         .dm_exception_addr_i   ( DEBUG_START_ADDR + 16'h080C ), // From Control PULP, to be checked

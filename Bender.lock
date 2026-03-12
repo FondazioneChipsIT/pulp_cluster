@@ -84,10 +84,10 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40p:
-    revision: 1a93f340e9dadb9f7c8c471f27a40932c8b1c62e
+    revision: 7e48663e6908d932ed2a315d186089d37545c7ad
     version: null
     source:
-      Git: https://github.com/pulp-platform/cv32e40p.git
+      Git: https://github.com/FondazioneChipsIT/cv32e40p.git
     dependencies:
     - common_cells
     - fpnew
@@ -231,8 +231,13 @@ packages:
     dependencies:
     - axi_slice
   redmule:
+<<<<<<< HEAD
     revision: 78696fb0d6d429bdad2e38740792648d44095605
     version: 2.0.4
+=======
+    revision: 9223ccc932e21d0667e9c2d30831db41eec9299e
+    version: null
+>>>>>>> 9484587 (updated bender dependencies)
     source:
       Git: https://github.com/pulp-platform/redmule.git
     dependencies:

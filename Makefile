@@ -81,6 +81,14 @@ sw-init: pulp-runtime fault_injection_sim regression_tests
 sw-clean:
 	@rm -rf pulp-runtime fault_injection_sim regression_tests
 
+## Clone the InjectaFault module
+INJECTAFAULT_REMOTE ?= https://github.com/pulp-platform/InjectaFault.git
+INJECTAFAULT_COMMIT ?= 445360dddefa4cc0730a775075a58ba743f06b4c
+
+fault_injection:
+	git clone $(INJECTAFAULT_REMOTE) scripts/fault_injection_sim
+	cd $@ && git checkout $(INJECTAFAULT_COMMIT)
+
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
 PULP_RUNTIME_COMMIT ?= 9bd23d2b2b6b6c74fc26a3ab3402fbebc589dace # branch: chips-it

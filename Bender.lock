@@ -231,13 +231,8 @@ packages:
     dependencies:
     - axi_slice
   redmule:
-<<<<<<< HEAD
     revision: 78696fb0d6d429bdad2e38740792648d44095605
     version: 2.0.4
-=======
-    revision: 9223ccc932e21d0667e9c2d30831db41eec9299e
-    version: null
->>>>>>> 9484587 (updated bender dependencies)
     source:
       Git: https://github.com/pulp-platform/redmule.git
     dependencies:
@@ -272,6 +267,14 @@ packages:
     - axi
     - common_cells
     - common_verification
+  riscv:
+    revision: c760db14dbd6cc3ec3b8ae8274df2eac7225bcac
+    version: null
+    source:
+      Git: https://github.com/AlSaqr-platform/riscv_nn.git
+    dependencies:
+    - fpnew
+    - tech_cells_generic
   scm:
     revision: 472f99affe44ff7b282b519c047a3cfeb35b16c6
     version: 1.2.0

@@ -100,7 +100,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= c73604c654503a9fc846ff89ccddcd2d8c198080
+REGRESSION_TESTS_COMMIT ?= 45ef8558b66d88f69613fe2fae5aa1f74360d32b
 # branch: lg/ohw_cv32
 
 regression_tests:

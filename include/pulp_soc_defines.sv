@@ -19,6 +19,10 @@
  * 
  */
 
+`ifndef PULP_SOC_DEFINES_SV
+`define PULP_SOC_DEFINES_SV
+
+
 `define CLUSTER_ALIAS
 `define PRIVATE_ICACHE
 `define HIERARCHY_ICACHE_32BIT
@@ -79,3 +83,5 @@ localparam jtag_idcode_t PulpOpenIdCode = '{
 // JTAG
 `define DMI_JTAG_IDCODE PulpOpenIdCode
 // `define DMI_JTAG_IDCODE 32'h249511C3
+
+`endif

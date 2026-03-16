@@ -271,30 +271,31 @@ module dmac_wrap #(
   // Here, another clock gating level is applied:
   //    - completely hw-controlled, this clock gating cell controls the datapath clock, disabling it when not needed.
 
-  logic [NumStreams-1:0] keep_datapath_clocked, datapath_clk_en, s_clk_stream_en;
+  logic [NumStreams-1:0] datapath_clk_en, s_clk_stream_en;
 
-  // Register to keep the clock active until event completion
+  // Register to keep the clock active on the physical channel currently being used until event completion
   //    Once the transfer has started its execution (busy_o == 1'b1)
   //    the datapath needs to be clocked until the completion event
   //    has been received (|trans_complete). Then the datapath
   //    can be gated again.
 
   for (genvar i = 0; i < NumStreams; i++) begin: gen_idma_datapath_cg_cells
+
     always_ff @(posedge clk_i, negedge rst_ni) begin
       if (rst_ni == 1'b0) begin
-        keep_datapath_clocked[i] <= 1'b0;
-      end else if (busy_o == 1'b1) begin
-        keep_datapath_clocked[i] <= 1'b1;
-      end else if (|trans_complete) begin
-        keep_datapath_clocked[i] <= 1'b0;
+        s_clk_stream_en[i] <= 1'b0;
+      end else if (one_fe_valid & fe_valid[i]) begin
+        s_clk_stream_en[i] <= 1'b1;
+      end else if (trans_complete[i]) begin
+        s_clk_stream_en[i] <= 1'b0;
       end
     end
-    assign s_clk_stream_en[i] = (i == stream_idx) ? 1'b1 : 1'b0;
-    assign datapath_clk_en[i] = (one_fe_valid | (|trans_complete) | keep_datapath_clocked[i]) & s_clk_stream_en[i];
 
-    // // --------------------------------------------------------------------------------------------------------------------------------
-    // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules on the enabled stream
-    // // --------------------------------------------------------------------------------------------------------------------------------
+    assign datapath_clk_en[i] = (one_fe_valid & fe_valid[i]) | s_clk_stream_en[i];
+
+    // // ------------------------------------------------------------------------------------------------------------------------------------------
+    // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules on the enabled physical channel
+    // // ------------------------------------------------------------------------------------------------------------------------------------------
 
     cluster_clock_gating idma_datapath_ckgate (
       .clk_i      ( clk_i                 ),

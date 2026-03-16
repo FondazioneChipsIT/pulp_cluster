@@ -83,8 +83,8 @@ sw-clean:
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 226464c
- # branch: lg/ohw_cv32
+PULP_RUNTIME_COMMIT ?= c618a8e2840dbbabda6654557549cc6da291da34
+ # branch: ng/ohw_cv32
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@

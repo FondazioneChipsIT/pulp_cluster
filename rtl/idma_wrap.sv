@@ -79,7 +79,7 @@ module dmac_wrap #(
   logic [NumRegs-1:0]                  config_r_opc;
   logic [NumRegs-1:0][PE_ID_WIDTH-1:0] config_r_id;
 
-  logic datapath_clk_gated;
+  logic [NumStreams-1:0] datapath_clk_gated;
 
   // tie-off pe control ports
   for (genvar i = 0; i < NB_CORES; i++) begin : gen_ctrl_registers
@@ -210,7 +210,7 @@ module dmac_wrap #(
       .axi_req_t (axi_req_t),
       .axi_resp_t(axi_resp_t)
     ) i_init_axi_rw_join (
-      .clk_i ( datapath_clk_gated ),
+      .clk_i ( datapath_clk_gated[s] ),
       .rst_ni,
       .slv_read_req_i  (dma_req[2*s+1]),
       .slv_read_resp_o (dma_rsp[2*s+1]),
@@ -271,7 +271,7 @@ module dmac_wrap #(
   // Here, another clock gating level is applied:
   //    - completely hw-controlled, this clock gating cell controls the datapath clock, disabling it when not needed.
 
-  logic keep_datapath_clocked, datapath_clk_en;
+  logic [NumStreams-1:0] keep_datapath_clocked, datapath_clk_en, s_clk_stream_en;
 
   // Register to keep the clock active until event completion
   //    Once the transfer has started its execution (busy_o == 1'b1)
@@ -279,28 +279,31 @@ module dmac_wrap #(
   //    has been received (|trans_complete). Then the datapath
   //    can be gated again.
 
-  always_ff @(posedge clk_i, negedge rst_ni) begin
-    if (rst_ni == 1'b0) begin
-      keep_datapath_clocked <= 1'b0;
-    end else if (busy_o == 1'b1) begin
-      keep_datapath_clocked <= 1'b1;
-    end else if (|trans_complete) begin
-      keep_datapath_clocked <= 1'b0;
+  for (genvar i = 0; i < NumStreams; i++) begin: gen_idma_datapath_cg_cells
+    always_ff @(posedge clk_i, negedge rst_ni) begin
+      if (rst_ni == 1'b0) begin
+        keep_datapath_clocked[i] <= 1'b0;
+      end else if (busy_o == 1'b1) begin
+        keep_datapath_clocked[i] <= 1'b1;
+      end else if (|trans_complete) begin
+        keep_datapath_clocked[i] <= 1'b0;
+      end
     end
+    assign s_clk_stream_en[i] = (i == stream_idx) ? 1'b1 : 1'b0;
+    assign datapath_clk_en[i] = (one_fe_valid | (|trans_complete) | keep_datapath_clocked[i]) & s_clk_stream_en[i];
+
+    // // --------------------------------------------------------------------------------------------------------------------------------
+    // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules on the enabled stream
+    // // --------------------------------------------------------------------------------------------------------------------------------
+
+    cluster_clock_gating idma_datapath_ckgate (
+      .clk_i      ( clk_i                 ),
+      .en_i       ( datapath_clk_en[i]    ),
+      .test_en_i  ( test_mode_i           ),
+      .clk_o      ( datapath_clk_gated[i] )
+    );
+
   end
-
-  assign datapath_clk_en = (one_fe_valid | (|trans_complete) | keep_datapath_clocked);
-
-  // // ----------------------------------------------------------------------------------------------------------
-  // // DATAPATH CLOCK GATING CELL --> This gates everything except for the frontend and the periph_to_reg modules
-  // // ----------------------------------------------------------------------------------------------------------
-
-  cluster_clock_gating idma_datapath_ckgate (
-    .clk_i      ( clk_i              ),
-    .en_i       ( datapath_clk_en    ),
-    .test_en_i  ( test_mode_i        ),
-    .clk_o      ( datapath_clk_gated )
-  );
 
   // ------------------------------------------------------
   // FRONTEND
@@ -378,7 +381,7 @@ module dmac_wrap #(
     idma_transfer_id_gen #(
       .IdWidth(ID_WIDTH)
     ) i_idma_transfer_id_gen (
-      .clk_i      ( datapath_clk_gated ),
+      .clk_i      ( datapath_clk_gated[s] ),
       .rst_ni,
       .issue_i    (fe_valid[s] & fe_ready[s]),
       .retire_i   (trans_complete[s]),
@@ -395,7 +398,7 @@ module dmac_wrap #(
       .DEPTH(GLOBAL_QUEUE_DEPTH),
       .T    (idma_nd_req_t)
     ) i_3D_request_fifo (
-      .clk_i     ( datapath_clk_gated ),
+      .clk_i     ( datapath_clk_gated[s] ),
       .rst_ni,
       .flush_i   (1'b0),
       .testmode_i(test_mode_i),
@@ -418,7 +421,7 @@ module dmac_wrap #(
       .idma_nd_req_t(idma_nd_req_t),
       .RepWidths    (RepWidths)
     ) i_idma_3D_midend (
-      .clk_i            ( datapath_clk_gated       ),
+      .clk_i            ( datapath_clk_gated[s]       ),
       .rst_ni,
       .nd_req_i         (twod_req_queue[s]),
       .nd_req_valid_i   (twod_queue_valid[s]),
@@ -509,7 +512,7 @@ module dmac_wrap #(
         .ErrorHandling       ( 1'b0              ),
         .Burst_len           ( IDMA_BURST_LENGTH )
       ) i_idma_backend_r_obi_rw_init_w_axi (
-        .clk_i              ( datapath_clk_gated                               ),
+        .clk_i              ( datapath_clk_gated[s]                   ),
         .rst_ni             ( rst_ni                                  ),
         .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
@@ -616,7 +619,7 @@ module dmac_wrap #(
       spill_register #(
         .T(logic)
       ) i_init_read_rsp_reflect (
-        .clk_i  ( datapath_clk_gated ),
+        .clk_i  ( datapath_clk_gated[s] ),
         .rst_ni,
         .valid_i(init_read_req.req_valid),
         .ready_o(init_read_rsp.req_ready),
@@ -632,7 +635,7 @@ module dmac_wrap #(
       spill_register #(
         .T(logic)
       ) i_init_write_rsp_reflect (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .valid_i(init_write_req.req_valid),
         .ready_o(init_write_rsp.req_ready),
@@ -737,7 +740,7 @@ module dmac_wrap #(
         .RejectZeroTransfers (1'b1),
         .ErrorHandling       (1'b0)
       ) i_idma_backend_r_axi_rw_init_rw_obi (
-        .clk_i              ( datapath_clk_gated                               ),
+        .clk_i              ( datapath_clk_gated[s]                   ),
         .rst_ni             ( rst_ni                                  ),
         .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
@@ -852,7 +855,7 @@ module dmac_wrap #(
       spill_register #(
         .T(logic)
       ) i_init_read_rsp_reflect (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .valid_i(init_read_req.req_valid),
         .ready_o(init_read_rsp.req_ready),
@@ -867,7 +870,7 @@ module dmac_wrap #(
       spill_register #(
         .T(logic)
       ) i_init_write_rsp_reflect (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .valid_i(init_write_req.req_valid),
         .ready_o(init_write_rsp.req_ready),
@@ -912,7 +915,7 @@ module dmac_wrap #(
         .NumMaxTrans         ( 2             ),
         .UseIdForRouting     ( 1'b0          )
       ) obi_read_mux_i (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .testmode_i     (test_mode_i),
         .sbr_ports_req_i({obi_reorg_req_from_dma[s], obi_read_req_from_dma[s]}),
@@ -932,7 +935,7 @@ module dmac_wrap #(
         .obi_r_chan_t(obi_r_chan_t),
         .Depth(1)
       ) obi_rready_converter_reorg_i (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .test_mode_i,
         .sbr_a_chan_i  ( obi_reorg_req_from_dma[s].a       ),
@@ -957,7 +960,7 @@ module dmac_wrap #(
       .obi_r_chan_t(obi_r_chan_t),
       .Depth(1)
     ) obi_rready_converter_read_i (
-      .clk_i ( datapath_clk_gated ),
+      .clk_i ( datapath_clk_gated[s] ),
       .rst_ni,
       .test_mode_i,
       .sbr_a_chan_i  ( obi_read_req_muxed[s].a        ),
@@ -982,7 +985,7 @@ module dmac_wrap #(
       .obi_r_chan_t(obi_r_chan_t),
       .Depth(1)
     ) obi_rready_converter_wr_i (
-      .clk_i ( datapath_clk_gated ),
+      .clk_i ( datapath_clk_gated[s] ),
       .rst_ni,
       .test_mode_i,
       .sbr_a_chan_i  ( obi_write_req_from_dma[s].a       ),
@@ -1030,7 +1033,7 @@ module dmac_wrap #(
         .MaxTrans (32'd1),
         .FifoDepth(32'd1)
       ) i_mem_to_banks_write (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .req_i         ( obi_write_req_from_rrc[s].req                                                                     ),
         .gnt_o         ( obi_write_rsp_to_rrc[s].gnt                                                                       ),
@@ -1071,7 +1074,7 @@ module dmac_wrap #(
         .MaxTrans (32'd1),
         .FifoDepth(32'd1)
       ) i_mem_to_banks_read (
-        .clk_i ( datapath_clk_gated ),
+        .clk_i ( datapath_clk_gated[s] ),
         .rst_ni,
         .req_i         ( obi_read_req_from_rrc[s].req                                                                        ),
         .gnt_o         ( obi_read_rsp_to_rrc[s].gnt                                                                          ),
@@ -1120,7 +1123,7 @@ module dmac_wrap #(
           .MaxTrans (32'd1),
           .FifoDepth(32'd1)
         ) i_mem_to_banks_reorg (
-          .clk_i ( datapath_clk_gated ),
+          .clk_i ( datapath_clk_gated[s] ),
           .rst_ni,
           .req_i         ( obi_reorg_req_from_rrc[s].req                                                                     ),
           .gnt_o         ( obi_reorg_rsp_to_rrc[s].gnt                                                                       ),

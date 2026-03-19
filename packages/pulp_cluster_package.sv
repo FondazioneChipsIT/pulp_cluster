@@ -100,6 +100,10 @@ package pulp_cluster_package;
     bit HMRSeparateAxiBus;
     // Number of separate voters/checkers for individual buses
     bit HMRNumBusVoters;
+    // Enable Timing Diversity for DMR mode
+    bit HMRDmrTimingDivEnabled;
+    // Number of delay cycles for DMR Timing Diversity mode
+    byte_t HMRDmrTimingDivDelays;
     // Enable ECC
     bit EnableECC;
     // Enable ECC on the hci interconnect
@@ -230,6 +234,8 @@ package pulp_cluster_package;
     HMRSeparateDataVoters: 1,
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
+    HMRDmrTimingDivEnabled: 0,
+    HMRDmrTimingDivDelays: 2,
     EnableECC: 1,
     ECCInterco: 1,
     iCacheNumBanks: 2,

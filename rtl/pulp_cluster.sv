@@ -1121,6 +1121,8 @@ generate
       .SeparateData      ( Cfg.HMRSeparateDataVoters            ),
       .SeparateAxiBus    ( Cfg.HMRSeparateAxiBus                ),
       .NumBusVoters      ( Cfg.HMRNumBusVoters                  ),
+      .TimingDivMode     ( Cfg.HMRDmrTimingDivEnabled           ),
+      .TimingDivDelays   ( Cfg.HMRDmrTimingDivDelays            ),
       .all_inputs_t      ( core_inputs_t                        ),
       .nominal_outputs_t ( core_outputs_t                       ),
       .core_backup_t     ( core_backup_t                        ),

@@ -82,7 +82,7 @@ sw-clean:
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 9bd23d2b2b6b6c74fc26a3ab3402fbebc589dace # branch: chips-it
+PULP_RUNTIME_COMMIT ?= 880227be037670ecf5717520df5f531ea6501442 # branch: hmr_timing_diversity
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
@@ -98,7 +98,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= dd41d893ee371df7407ce2c0128d2d3a45c4ec71 # branch: chips-it
+REGRESSION_TESTS_COMMIT ?= d89c9dc76647cbf3fae2a4a371655b148f91f424 # branch: hmr_timing_diversity
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@

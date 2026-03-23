@@ -197,7 +197,8 @@ module pulp_cluster
   // WRITE RESPONSE CHANNEL
   input  logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_wptr_i,
   input  logic [AsyncOutBDataWidth-1:0]          async_data_master_b_data_i,
-  output logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_rptr_o
+  output logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_rptr_o,
+  output logic [(Cfg.NumCores>>1)-1:0]           hmr_dmr_failure_to_OT_o
 );
 
 //Ensure that the input AXI ID width is big enough to accomodate the IDs of internal wiring
@@ -1121,7 +1122,6 @@ generate
       .SeparateData      ( Cfg.HMRSeparateDataVoters            ),
       .SeparateAxiBus    ( Cfg.HMRSeparateAxiBus                ),
       .NumBusVoters      ( Cfg.HMRNumBusVoters                  ),
-      .TimingDivMode     ( Cfg.HMRDmrTimingDivEnabled           ),
       .TimingDivDelays   ( Cfg.HMRDmrTimingDivDelays            ),
       .all_inputs_t      ( core_inputs_t                        ),
       .nominal_outputs_t ( core_outputs_t                       ),
@@ -1162,7 +1162,8 @@ generate
       .core_inputs_o          ( hmr2core     ),
       .core_nominal_outputs_i ( core2hmr     ),
       .core_bus_outputs_i     ( '0           ),
-      .core_axi_outputs_i     ( '0           )
+      .core_axi_outputs_i     ( '0           ),
+      .dmr_failure_to_OT_o    ( hmr_dmr_failure_to_OT_o )
     );
 
     `ifndef VERILATOR

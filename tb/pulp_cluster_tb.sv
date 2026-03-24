@@ -317,6 +317,7 @@ module pulp_cluster_tb;
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
     HMRDmrTimingDivDelays: 0,
+    DMRTimingDivSupported: 0,
     EnableECC: 1,
     ECCInterco: 1,
     iCacheNumBanks: 2,

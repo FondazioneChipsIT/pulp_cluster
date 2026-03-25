@@ -248,7 +248,7 @@ packages:
     - register_interface
     - tech_cells_generic
   redundancy_cells:
-    revision: 70b5b78974366c7b1d6f25b21af1f69474d02a9e
+    revision: 957a149f23d0536a96544ea34ce09d9ad1716fba
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/redundancy_cells.git

@@ -426,7 +426,7 @@ module pulp_cluster_tb;
     .async_data_slave_b_wptr_o   ( async_soc_to_cluster_axi_bus.b_wptr  ),
     .async_data_slave_b_rptr_i   ( async_soc_to_cluster_axi_bus.b_rptr  ),
     .async_data_slave_b_data_o   ( async_soc_to_cluster_axi_bus.b_data  ),
-    .hmr_dmr_failure_to_OT_o     (                                      )
+    .dmr_timing_diversity_failure_o (                                      )
   );
 
   // Load ELF binary file

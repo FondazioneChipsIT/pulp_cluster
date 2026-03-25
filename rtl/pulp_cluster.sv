@@ -198,7 +198,7 @@ module pulp_cluster
   input  logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_wptr_i,
   input  logic [AsyncOutBDataWidth-1:0]          async_data_master_b_data_i,
   output logic [Cfg.AxiCdcLogDepth:0]            async_data_master_b_rptr_o,
-  output logic [(Cfg.NumCores>>1)-1:0]           hmr_dmr_failure_to_OT_o
+  output logic [(Cfg.NumCores>>1)-1:0]           dmr_timing_diversity_failure_o
 );
 
 //Ensure that the input AXI ID width is big enough to accomodate the IDs of internal wiring
@@ -1164,7 +1164,7 @@ generate
       .core_nominal_outputs_i ( core2hmr     ),
       .core_bus_outputs_i     ( '0           ),
       .core_axi_outputs_i     ( '0           ),
-      .dmr_failure_to_OT_o    ( hmr_dmr_failure_to_OT_o )
+      .dmr_timing_diversity_failure_o    ( dmr_timing_diversity_failure_o )
     );
 
     `ifndef VERILATOR

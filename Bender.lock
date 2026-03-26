@@ -129,7 +129,7 @@ packages:
     dependencies:
     - common_cells
   hci:
-    revision: 3e63936991569d0b1e315d6914478937b37bb338
+    revision: 9adde8fce628fc085b9db5feffac5782a16825da
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/hci.git

@@ -104,7 +104,7 @@ module data_periph_demux
    logic [BYTE_ENABLE_BIT - 1:0]          data_be_to_L2;
    logic                                  data_gnt_from_L2;
 
-   enum logic [1:0]                       {SH, PE, EXT } request_destination, destination;
+   enum logic [1:0]                       {SH, PE, EXT } request_destination, destination, arriving_order[1:0];
 
 
   logic [ADDR_WIDTH - 1:0]                data_add_int;
@@ -187,6 +187,7 @@ end
       if(rst_ni == 1'b0)
       begin
           request_destination <= SH;
+
       end
       else
       begin
@@ -233,6 +234,7 @@ end
                 default:
                 begin
                     request_destination <= PE;
+                       
                 end  // CLUSTER PERIPHERAL and REst of the memory map
 
                 endcase
@@ -241,6 +243,43 @@ end
           end
       end
    end
+
+logic [1:0] num_outstanding;
+
+always_ff @(posedge clk, negedge rst_ni) begin
+  if (rst_ni == 1'b0) begin
+    arriving_order[0] <= SH;
+    arriving_order[1] <= SH;
+    num_outstanding   <= 2'b0;
+  end else begin
+
+    if (data_req_i && data_gnt_o) begin
+
+      if (data_r_valid_o) begin
+        // PUSH + POP
+        if (num_outstanding == 2) begin
+          arriving_order[1] <= arriving_order[0];
+          arriving_order[0] <= destination;
+        end else begin
+          arriving_order[0] <= destination;
+        end
+
+
+      end else begin
+        arriving_order[1] <= arriving_order[0];
+        arriving_order[0] <= destination;
+        num_outstanding   <= num_outstanding + 1;
+      end
+
+    end else if (data_r_valid_o) begin
+      arriving_order[1] <= arriving_order[0];
+      num_outstanding   <= num_outstanding - 1;
+    end
+
+  end
+end
+
+
 
 
    // USED FOR THE PE FSM
@@ -406,6 +445,8 @@ end
    //********************************************************
    //************** RESPONSE ARBITER ************************
    //********************************************************
+
+   /*
    always_comb
    begin: _RESPONSE_ARBITER_
       case(request_destination)
@@ -438,7 +479,44 @@ end
         end
       endcase
    end
+   */
 
+   logic [1:0] head;  // 2-bit per identificare SH, PE, EXT
+
+   always_comb begin
+      case(num_outstanding)
+         2: head = arriving_order[1]; // se ci sono due transazioni in volo, serviamo prima quella “vecchia”
+         1: head = arriving_order[0]; // se c'è solo una transazione in volo, è quella da servire
+         default: head = SH;          // nessuna transazione, valore dummy
+      endcase
+   end
+
+   always_comb begin
+   data_r_valid_o = 1'b0;
+   data_r_rdata_o = '0;
+   data_r_opc_o   = 1'b0;
+
+   case (head)
+
+      SH: if (data_r_valid_i_SH) begin
+         data_r_valid_o = 1;
+         data_r_rdata_o = data_r_rdata_i_SH;
+      end
+
+      PE: if (s_data_r_valid_PE) begin
+         data_r_valid_o = 1;
+         data_r_rdata_o = s_data_r_data_PE;
+         data_r_opc_o   = s_data_r_opc_PE;
+      end
+
+      EXT: if (data_r_valid_i_EXT) begin
+         data_r_valid_o = 1;
+         data_r_rdata_o = data_r_rdata_i_EXT;
+         data_r_opc_o   = data_r_opc_i_EXT;
+      end
+
+   endcase
+   end   
    //********************************************************
    //************** PE INTERFACE ****************************
    //********************************************************

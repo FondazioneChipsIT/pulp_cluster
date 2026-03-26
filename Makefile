@@ -79,11 +79,11 @@ Bender.lock:
 
 sw-init: pulp-runtime fault_injection_sim regression_tests
 sw-clean:
-	rm -rf pulp-runtime fault_injection_sim regression_test
+	rm -rf pulp-runtime fault_injection_sim regression_tests
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= c618a8e2840dbbabda6654557549cc6da291da34
+PULP_RUNTIME_COMMIT ?= 9cb249f822b8d1cada1aaec9a0d4ba35241a8970
  # branch: ng/ohw_cv32
 
 pulp-runtime:
@@ -100,7 +100,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= 45ef8558b66d88f69613fe2fae5aa1f74360d32b
+REGRESSION_TESTS_COMMIT ?= d86e4f63f7a7f47aacba1469d407be426c4da7d1
 # branch: lg/ohw_cv32
 
 regression_tests:

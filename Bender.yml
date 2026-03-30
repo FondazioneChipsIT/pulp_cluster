@@ -32,7 +32,7 @@ dependencies:
   cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git", rev: 7e48663 } # branch: lg/pulp_cluster
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git", rev: "pulpissimo-v6.1.2" }
   scm:                    { git: "https://github.com/pulp-platform/scm.git", rev: v1.2.0 }
-  hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: 9adde8fce628fc085b9db5feffac5782a16825da}
+  hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: b68f1e2c3688f221045056dad70dbd328f043fe5}
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.7  }
   redundancy_cells:       { git: "https://github.com/pulp-platform/redundancy_cells.git", rev: 6ba6f41 } # yt/redmule-v2
   redmule:                { git: "https://github.com/pulp-platform/redmule.git",              version: =2.0.4 }

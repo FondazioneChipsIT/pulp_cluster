@@ -100,8 +100,13 @@ fault_injection_sim:
 	cd $@ && git checkout $(FAULT_SIM_COMMIT)
 
 ## Clone regression tests
+<<<<<<< HEAD
 REGRESSION_TESTS_REMOTE ?= https://github.com/pulp-platform/regression_tests.git
 REGRESSION_TESTS_COMMIT ?= f173611e3e8f15e7f526d40712135e7ff976f805 # branch: lg/upstream
+=======
+REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
+REGRESSION_TESTS_COMMIT ?= a795d6a318c5aa5842e61e2e2daf2d2c6cb89454 # branch: chips-it
+>>>>>>> ada7e70 ([MAKEFILE] Bump regression_tests to fix idma_{3d,2d} and add idma tests to CI)
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@

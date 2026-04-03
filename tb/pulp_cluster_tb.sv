@@ -57,14 +57,14 @@ module pulp_cluster_tb;
   localparam AxiWideByteOffset = $clog2(AxiWideBeWidth);
   localparam AxiUw = 10;
 
-  localparam bit[AxiAw-1:0] ClustBase       = 'h10000000;
+  localparam bit[AxiAw-1:0] ClustBase       = 'hB0000000;
   localparam bit[AxiAw-1:0] ClustPeriphOffs = 'h00200000;
   localparam bit[AxiAw-1:0] ClustExtOffs    = 'h00400000;
   localparam bit[      5:0] ClustIdx        = 'h0;
   localparam bit[AxiAw-1:0] ClustBaseAddr   = ClustBase - (ClustIdx << 22);
-  localparam bit[AxiAw-1:0] L2BaseAddr      = 'h1C000000;
+  localparam bit[AxiAw-1:0] L2BaseAddr      = 'hA0000000;
   localparam bit[AxiAw-1:0] L2Size          = 'h00100000;
-  localparam bit[AxiAw-1:0] UartBaseAddr    = 'h40000000;
+  localparam bit[AxiAw-1:0] UartBaseAddr    = 'h1A222000;
   localparam bit[AxiAw-1:0] UartSize        = 'h1000;
   localparam bit[AxiAw-1:0] BootAddr        = L2BaseAddr + 'h8080;
   localparam bit[AxiAw-1:0] ClustReturnInt  = ClustBase + ClustPeriphOffs + 'h100;
@@ -304,11 +304,11 @@ module pulp_cluster_tb;
     TcdmSize: 256*1024,
     TcdmNumBank: 16,
     HwpePresent: 1,
-    HwpeCfg: '{NumHwpes: 3, HwpeList: {SOFTEX, NEUREKA, REDMULE}},
+    HwpeCfg: '{NumHwpes: 1, HwpeList: {pulp_cluster_package::NEUREKA}},
     HwpeNumPorts: 9,
     HMRPresent: 1,
     HMRDmrEnabled: 1,
-    HMRTmrEnabled: 1,
+    HMRTmrEnabled: 0,
     HMRDmrFIxed: 0,
     HMRTmrFIxed: 0,
     HMRInterleaveGrps: 1,
@@ -316,8 +316,8 @@ module pulp_cluster_tb;
     HMRSeparateDataVoters: 1,
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
-    HMRDmrTimingDivDelays: 0,
-    DMRTimingDivSupported: 0,
+    HMRDmrTimingDivDelays: 1,
+    DMRTimingDivSupported: 1,
     EnableECC: 1,
     ECCInterco: 1,
     iCacheNumBanks: 2,
@@ -332,7 +332,7 @@ module pulp_cluster_tb;
     BootRomBaseAddr: BootAddr,
     BootAddr: BootAddr,
     EnablePrivateFpu: 1,
-    EnablePrivateFpDivSqrt: 0,
+    EnablePrivateFpDivSqrt: 1,
     NumAxiIn: NumAxiSubordinatePorts,
     NumAxiOut: NumAxiManagerPorts,
     AxiIdInWidth: AxiIw-2,

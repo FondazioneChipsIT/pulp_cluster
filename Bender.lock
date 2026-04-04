@@ -153,17 +153,17 @@ packages:
     - scm
     - tech_cells_generic
   hwpe-ctrl:
-    revision: 3690a3c648f120546d8de2bc583d5170c36d2f20
-    version: 2.0.0
+    revision: 3156cabafff3b4fb90c1c78fb02b912a931a037c
+    version: null
     source:
-      Git: https://github.com/pulp-platform/hwpe-ctrl.git
+      Git: https://github.com/LuigiGhionda/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
   hwpe-stream:
-    revision: b3d33afdd27e79bcda1348d0ab5f4afd52c03106
-    version: 1.9.0
+    revision: 4c676e44ccf70a0d8dc67a84c6e02372bfd22557
+    version: null
     source:
-      Git: https://github.com/pulp-platform/hwpe-stream.git
+      Git: https://github.com/LuigiGhionda/hwpe-stream.git
     dependencies:
     - tech_cells_generic
   ibex:
@@ -205,14 +205,16 @@ packages:
     dependencies:
     - common_cells
   neureka:
-    revision: f4e131c86205d37882cf02ea4dd3bd141ef32d86
+    revision: c4c2b5f0d7c431938f16acf0969208d8077f8e69
     version: null
     source:
-      Git: https://github.com/pulp-platform/neureka.git
+      Git: https://github.com/LuigiGhionda/neureka.git
     dependencies:
+    - common_cells
     - hci
     - hwpe-ctrl
     - hwpe-stream
+    - redundancy_cells
     - register_interface
     - zeroriscy
   obi:

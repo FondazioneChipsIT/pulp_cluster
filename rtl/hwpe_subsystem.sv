@@ -118,7 +118,7 @@ module hwpe_subsystem
 
       neureka_top   #(
         .PE_H        ( 4        ),
-        .PE_W        ( 4        ),
+        .PE_W        ( 2        ),
         .ID          ( ID_WIDTH ),
         .N_CORES     ( N_CORES  ),
         .`HCI_SIZE_PARAM(tcdm) ( HCI_HWPE_SIZE )

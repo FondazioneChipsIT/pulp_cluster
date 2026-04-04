@@ -35,7 +35,7 @@ dependencies:
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git", version: =0.4.7  }
   redundancy_cells:       { git: "https://github.com/FondazioneChipsIT/redundancy_cells.git", rev: cb3d8468c564687c1f8f2516b90bd4af05bd052d } # yt/timing_diversity
   redmule:                { git: "https://github.com/pulp-platform/redmule.git", version: =2.0.4 }
-  neureka:                { git: "https://github.com/pulp-platform/neureka.git", rev: f4e131c } # branch: lg/astral-v1.1
+  neureka:                { git: "https://github.com/LuigiGhionda/neureka.git", rev: c4c2b5f0d7c431938f16acf0969208d8077f8e69 } # branch: scarv
   softex:                 { git: "https://github.com/FondazioneChipsIT/softex.git", rev: a622550d91dd55bf30bc359e10b2c70cae3042d6 } # gl/fix_pkg_import
 
 export_include_dirs:

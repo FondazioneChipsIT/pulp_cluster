@@ -316,6 +316,8 @@ module pulp_cluster_tb;
     HMRSeparateDataVoters: 1,
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
+    HMRDmrTimingDivDelays: 0,
+    DMRTimingDivSupported: 0,
     EnableECC: 1,
     ECCInterco: 1,
     iCacheNumBanks: 2,
@@ -423,7 +425,8 @@ module pulp_cluster_tb;
     .async_data_slave_r_data_o   ( async_soc_to_cluster_axi_bus.r_data  ),
     .async_data_slave_b_wptr_o   ( async_soc_to_cluster_axi_bus.b_wptr  ),
     .async_data_slave_b_rptr_i   ( async_soc_to_cluster_axi_bus.b_rptr  ),
-    .async_data_slave_b_data_o   ( async_soc_to_cluster_axi_bus.b_data  )
+    .async_data_slave_b_data_o   ( async_soc_to_cluster_axi_bus.b_data  ),
+    .dmr_timing_diversity_failure_o (                                      )
   );
 
   // Load ELF binary file

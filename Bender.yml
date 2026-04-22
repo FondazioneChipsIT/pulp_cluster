@@ -33,7 +33,7 @@ dependencies:
   scm:                    { git: "https://github.com/pulp-platform/scm.git", version: =1.2.0 }
   hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: 3e63936991569d0b1e315d6914478937b37bb338 }
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git", version: =0.4.7  }
-  redundancy_cells:       { git: "https://github.com/FondazioneChipsIT/redundancy_cells.git", rev: 3e8889ef2e0debe382b98387e580fd852c4b0ccd } # yt/timing-diversity
+  redundancy_cells:       { git: "https://github.com/FondazioneChipsIT/redundancy_cells.git", rev: edaf9845738e5d00eb754f4dd41afb65cbf7ea7e } # yt/timing-diversity
   redmule:                { git: "https://github.com/pulp-platform/redmule.git", version: =2.0.4 }
   neureka:                { git: "https://github.com/pulp-platform/neureka.git", rev: f4e131c } # branch: lg/astral-v1.1
   softex:                 { git: "https://github.com/FondazioneChipsIT/softex.git", rev: a622550d91dd55bf30bc359e10b2c70cae3042d6 } # gl/fix_pkg_import

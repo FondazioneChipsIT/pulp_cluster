@@ -90,8 +90,27 @@ module cluster_bus_wrap
   // assign here your axi slaves
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[0], data_slave_req_i)
   `AXI_ASSIGN_RESP_STRUCT(data_slave_resp_o, axi_slave_resps[0])
-  `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[1], instr_slave_req_i)
-  `AXI_ASSIGN_RESP_STRUCT(instr_slave_resp_o, axi_slave_resps[1])
+  // Break the AR combinational path between the (Snitch) icache AXI master
+  // and the cluster_bus xbar. The AR spill register also cuts the ready path
+  // back from the xbar to the icache.
+  axi_cut #(
+    .Bypass     ( 1'b1             ),
+    .BypassAr   ( 1'b0             ),
+    .aw_chan_t  ( slave_aw_chan_t  ),
+    .w_chan_t   ( w_chan_t         ),
+    .b_chan_t   ( slave_b_chan_t   ),
+    .ar_chan_t  ( slave_ar_chan_t  ),
+    .r_chan_t   ( slave_r_chan_t   ),
+    .axi_req_t  ( slave_req_t      ),
+    .axi_resp_t ( slave_resp_t     )
+  ) i_instr_axi_cut (
+    .clk_i,
+    .rst_ni,
+    .slv_req_i  ( instr_slave_req_i  ),
+    .slv_resp_o ( instr_slave_resp_o ),
+    .mst_req_o  ( axi_slave_reqs[1]  ),
+    .mst_resp_i ( axi_slave_resps[1] )
+  );
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[2], dma_slave_req_i)
   `AXI_ASSIGN_RESP_STRUCT(dma_slave_resp_o, axi_slave_resps[2])
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[3], ext_slave_req_i)

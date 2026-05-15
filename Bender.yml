@@ -21,7 +21,7 @@ dependencies:
   idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: ChipsIt-v0.0.0 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
   hier-icache:            { git: "https://github.com/FondazioneChipsIT/hier-icache.git", rev: 416c5cbc7b9b8724a40da6ac6d0b19a9c6b864bc } # gl/fix_define
-  cluster_icache:         { git: "https://github.com/FondazioneChipsIT/cluster_icache.git", rev: 57ffb22066171d89974bdec240bad13f5efac9de } # gl/fix_define
+  cluster_icache:         { git: "https://github.com/FondazioneChipsIT/cluster_icache.git", rev: 531a6d1738f1f2f24add0c48fe37e729716ad12a } # ng/cache_cut
   cluster_peripherals:    { git: "https://github.com/FondazioneChipsIT/cluster_peripherals.git", rev: "6e55d0a74ff33ce9aac9fcd44ad702f323ace644" } # rg/idma_clock_gating
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: 0.39.8 }
   timer_unit:             { git: "https://github.com/pulp-platform/timer_unit.git", version: 1.0.2 }

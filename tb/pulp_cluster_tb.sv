@@ -605,13 +605,14 @@ module pulp_cluster_tb;
     $dumpon;
 
     // Wait until the probe is low
-    while (s_cluster_fetch_en)
+    while (!s_cluster_eoc)
       @(posedge s_clk);
 
     $dumpoff;
+    $display("[TB] Stop VCD dumping --> file is %s", vcd_dump_file);
 
     // Stop the execution
-    $finish(0);
+    // $finish(0);
   end: vcd_dump
 `endif
 

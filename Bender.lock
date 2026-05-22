@@ -45,7 +45,7 @@ packages:
     dependencies:
     - common_cells
   cluster_icache:
-    revision: 57ffb22066171d89974bdec240bad13f5efac9de
+    revision: 64e21ae455bbdde850c4df13bef86ea55ac42537
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/cluster_icache.git

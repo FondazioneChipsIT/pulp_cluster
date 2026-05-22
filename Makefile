@@ -45,7 +45,7 @@ endef
 ######################
 
 NONFREE_REMOTE ?= git@gitlab.chips.it:digitalresearchline/chips-restricted/pulp-cluster-nonfree.git
-NONFREE_COMMIT ?= 05c9c686130a51302091df5676cbf7a13c298f5e
+NONFREE_COMMIT ?= 5392f9d103cf3c49e43b88841165faeabae95ee5
 
 nonfree-init:
 	git clone $(NONFREE_REMOTE) nonfree
@@ -82,7 +82,7 @@ sw-clean:
 
 ## Clone pulp-runtime as SW stack
 PULP_RUNTIME_REMOTE ?= https://github.com/FondazioneChipsIT/pulp-runtime.git
-PULP_RUNTIME_COMMIT ?= 9bd23d2b2b6b6c74fc26a3ab3402fbebc589dace # branch: chips-it
+PULP_RUNTIME_COMMIT ?= 1587f45860bcde3c7dd70794c2476a0047553cda # branch: chips-it
 
 pulp-runtime:
 	git clone $(PULP_RUNTIME_REMOTE) $@
@@ -98,7 +98,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= a795d6a318c5aa5842e61e2e2daf2d2c6cb89454 # branch: chips-it
+REGRESSION_TESTS_COMMIT ?= 44e7781b39e2d154014d520201912003cc4e3d50 # branch: rg/fix_fault_inject_time_window
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@

@@ -98,7 +98,7 @@ fault_injection_sim:
 
 ## Clone regression tests
 REGRESSION_TESTS_REMOTE ?= https://github.com/FondazioneChipsIT/regression_tests.git
-REGRESSION_TESTS_COMMIT ?= 34fb9a05fb82a17ef112050400e4379cf511199e # branch: rg/fix_fault_inject_time_window
+REGRESSION_TESTS_COMMIT ?= 44e7781b39e2d154014d520201912003cc4e3d50 # branch: rg/fix_fault_inject_time_window
 
 regression_tests:
 	git clone $(REGRESSION_TESTS_REMOTE) $@

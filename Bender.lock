@@ -45,7 +45,7 @@ packages:
     dependencies:
     - common_cells
   cluster_icache:
-    revision: 57ffb22066171d89974bdec240bad13f5efac9de
+    revision: 531a6d1738f1f2f24add0c48fe37e729716ad12a
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/cluster_icache.git
@@ -84,7 +84,7 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40p:
-    revision: 7e48663e6908d932ed2a315d186089d37545c7ad
+    revision: 65c6961d8acf9698e09c976228c43692d700e697
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/cv32e40p.git
@@ -141,7 +141,7 @@ packages:
     - redundancy_cells
     - register_interface
   hier-icache:
-    revision: 416c5cbc7b9b8724a40da6ac6d0b19a9c6b864bc
+    revision: 1b357f524ec84e25e3e72617bff1a3199433ff49
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/hier-icache.git

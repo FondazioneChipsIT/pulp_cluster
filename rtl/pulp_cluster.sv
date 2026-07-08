@@ -677,6 +677,9 @@ cluster_interconnect_wrap #(
   .CLUSTER_ALIAS          ( Cfg.ClusterAlias                ),
   .USE_HETEROGENEOUS_INTERCONNECT ( Cfg.UseHci              ),
   .USE_ECC_INTERCONNECT   ( Cfg.EnableECC && Cfg.ECCInterco ),
+  .CUT_CORES              ( Cfg.HciCutCores                 ),
+  .CUT_IDMA               ( Cfg.HciCutIdma                  ),
+  .CUT_EXT                ( Cfg.HciCutExt                   ),
   .HCI_CORE_SIZE          ( HciCoreSizeParam                ),
   .HCI_HWPE_SIZE          ( HciHwpeSizeParam                ),
   .HCI_MEM_SIZE           ( HciMemSizeParam                 )

@@ -481,13 +481,13 @@ end
    end
    */
 
-   logic [1:0] head;  // 2-bit per identificare SH, PE, EXT
+   logic [1:0] head;  // 2-bit to identify SH, PE, EXT
 
    always_comb begin
       case(num_outstanding)
-         2: head = arriving_order[1]; // se ci sono due transazioni in volo, serviamo prima quella “vecchia”
-         1: head = arriving_order[0]; // se c'è solo una transazione in volo, è quella da servire
-         default: head = SH;          // nessuna transazione, valore dummy
+         2: head = arriving_order[1]; // if there are two transactions in flight, serve the older one first
+         1: head = arriving_order[0]; // if there is only one transaction in flight, it is the one to serve
+         default: head = SH;          // no transaction, dummy value
       endcase
    end
 

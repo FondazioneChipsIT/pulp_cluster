@@ -20,7 +20,7 @@ dependencies:
   mchan:                  { git: "https://github.com/pulp-platform/mchan.git", rev: v1.2.4 }
   idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: ChipsIt-v0.0.0 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
-  hier-icache:            { git: "https://github.com/FondazioneChipsIT/hier-icache.git", rev: 416c5cbc7b9b8724a40da6ac6d0b19a9c6b864bc } # gl/fix_define
+  hier-icache:            { git: "https://github.com/FondazioneChipsIT/hier-icache.git", rev: 1b357f524ec84e25e3e72617bff1a3199433ff49 } # ng/ohw_cv32
   cluster_icache:         { git: "https://github.com/FondazioneChipsIT/cluster_icache.git", rev: 531a6d1738f1f2f24add0c48fe37e729716ad12a } # ng/cache_cut
   cluster_peripherals:    { git: "https://github.com/FondazioneChipsIT/cluster_peripherals.git", rev: "6e55d0a74ff33ce9aac9fcd44ad702f323ace644" } # rg/idma_clock_gating
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: 0.39.8 }
@@ -29,7 +29,7 @@ dependencies:
   tech_cells_generic:     { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
   flex-v:                 { git: "https://github.com/FondazioneChipsIT/flex-v.git", rev: f22937733fd058550ef847ddbf1381e821f0f9d2 } # gl/fix_pkg_import
   riscv:                  { git: "https://github.com/AlSaqr-platform/riscv_nn.git", rev: astral-v1.0 }
-  cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git", rev: 7e48663 } # branch: lg/pulp_cluster
+  cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git", rev: 65c6961d8acf9698e09c976228c43692d700e697 } # branch: ng/pulp_cluster
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git", rev: "pulpissimo-v6.1.2" }
   scm:                    { git: "https://github.com/pulp-platform/scm.git", rev: v1.2.0 }
   hci:                    { git: "https://github.com/FondazioneChipsIT/hci.git", rev: ffeaac9ea00daa366699aa6fe03de315c662a00b}

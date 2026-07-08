@@ -46,6 +46,9 @@ module cluster_interconnect_wrap
 
   parameter int unsigned  USE_HETEROGENEOUS_INTERCONNECT = 1,
   parameter int unsigned  USE_ECC_INTERCONNECT           = 0,
+  parameter int unsigned  CUT_CORES                      = 1,
+  parameter int unsigned  CUT_IDMA                       = 1,
+  parameter int unsigned  CUT_EXT                        = 1,
   parameter hci_package::hci_size_parameter_t HCI_CORE_SIZE = '0,
   parameter hci_package::hci_size_parameter_t HCI_HWPE_SIZE = '0,
   parameter hci_package::hci_size_parameter_t HCI_MEM_SIZE  = '0
@@ -85,9 +88,9 @@ module cluster_interconnect_wrap
           .N_MEM     ( NB_TCDM_BANKS            ),
           .IW        ( TCDM_ID_WIDTH            ),
           .TS_BIT    ( TEST_SET_BIT             ),
-          .CUT_CORES ( 1                        ),
-          .CUT_IDMA  ( 1                        ),
-          .CUT_EXT   ( 1                        ),
+          .CUT_CORES ( CUT_CORES                ),
+          .CUT_IDMA  ( CUT_IDMA                 ),
+          .CUT_EXT   ( CUT_EXT                  ),
           //For an explanation of these macros refer to https://github.com/pulp-platform/hci/blob/v2.1.1/rtl/common/hci_helpers.svh
           .`HCI_SIZE_PARAM(cores) ( HCI_CORE_SIZE ),
           .`HCI_SIZE_PARAM(mems)  ( HCI_MEM_SIZE  ),
@@ -120,9 +123,9 @@ module cluster_interconnect_wrap
           .N_MEM     ( NB_TCDM_BANKS            ),
           .IW        ( TCDM_ID_WIDTH            ),
           .TS_BIT    ( TEST_SET_BIT             ),
-          .CUT_CORES ( 1                        ),
-          .CUT_IDMA  ( 1                        ),
-          .CUT_EXT   ( 1                        ),
+          .CUT_CORES ( CUT_CORES                ),
+          .CUT_IDMA  ( CUT_IDMA                 ),
+          .CUT_EXT   ( CUT_EXT                  ),
           .`HCI_SIZE_PARAM(cores) ( HCI_CORE_SIZE ),
           .`HCI_SIZE_PARAM(mems)  ( HCI_MEM_SIZE  ),
           .`HCI_SIZE_PARAM(hwpe)  ( HCI_HWPE_SIZE )

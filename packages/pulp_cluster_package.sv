@@ -172,6 +172,10 @@ package pulp_cluster_package;
     bit EnableRemapAddress;
     // Enable Snitch ICache
     bit SnitchICache;
+    // HCI interconnect pipeline cuts
+    bit HciCutCores;
+    bit HciCutIdma;
+    bit HciCutExt;
   } pulp_cluster_cfg_t;
 
   localparam int unsigned NB_SPERIPH_PLUGS_EU = 2;
@@ -204,7 +208,7 @@ package pulp_cluster_package;
   localparam int unsigned NumDmas = `NB_DMAS;
 
   localparam pulp_cluster_cfg_t PulpClusterDefaultCfg = '{
-    CoreType: RI5CY,
+    CoreType: pulp_cluster_package::CV32,
     NumCores: NumCores,
     DmaNumPlugs: NumDmas,
     DmaNumOutstandingBursts: 8,
@@ -217,10 +221,10 @@ package pulp_cluster_package;
     UseHci: 1,
     TcdmSize: 128*1024,
     TcdmNumBank: 16,
-    HwpePresent: 1,
+    HwpePresent: 0,
     HwpeCfg: '{NumHwpes: 3, HwpeList: {SOFTEX, NEUREKA, REDMULE}},
     HwpeNumPorts: 9,
-    HMRPresent: 1,
+    HMRPresent: 0,
     HMRDmrEnabled: 1,
     HMRTmrEnabled: 1,
     HMRDmrFIxed: 0,
@@ -230,8 +234,8 @@ package pulp_cluster_package;
     HMRSeparateDataVoters: 1,
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
-    EnableECC: 1,
-    ECCInterco: 1,
+    EnableECC: 0,
+    ECCInterco: 0,
     iCacheNumBanks: 2,
     iCacheNumLines: 1,
     iCacheNumWays: 4,
@@ -263,6 +267,9 @@ package pulp_cluster_package;
     ClusterExternalOffs: 'h00400000,
     EnableRemapAddress: 0,
     SnitchICache: 0,
+    HciCutCores: 1,
+    HciCutIdma: 1,
+    HciCutExt: 1,
     default: '0
   };
 

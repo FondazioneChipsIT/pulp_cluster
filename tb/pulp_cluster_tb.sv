@@ -306,7 +306,7 @@ module pulp_cluster_tb;
     HwpePresent: 1,
     HwpeCfg: '{NumHwpes: 3, HwpeList: {SOFTEX, NEUREKA, REDMULE}},
     HwpeNumPorts: 9,
-    HMRPresent: 1,
+    HMRPresent: 0,
     HMRDmrEnabled: 1,
     HMRTmrEnabled: 1,
     HMRDmrFIxed: 0,
@@ -348,7 +348,7 @@ module pulp_cluster_tb;
     ClusterPeriphOffs: ClustPeriphOffs,
     ClusterExternalOffs: ClustExtOffs,
     EnableRemapAddress: 0,
-    SnitchICache: 1,
+    SnitchICache: 0,
     default: '0
   };
 
@@ -356,7 +356,7 @@ module pulp_cluster_tb;
 `ifndef CLUSTER_NETLIST
 `ifdef USE_PULP_PARAMETERS
   #(
-    .Cfg ( PulpClusterCfg )
+    .Cfg ( pulp_cluster_package::PulpClusterDefaultCfg )
    )
 `endif
 `endif

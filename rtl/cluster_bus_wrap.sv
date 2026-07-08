@@ -90,6 +90,9 @@ module cluster_bus_wrap
   // assign here your axi slaves
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[0], data_slave_req_i)
   `AXI_ASSIGN_RESP_STRUCT(data_slave_resp_o, axi_slave_resps[0])
+  `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[1], instr_slave_req_i)
+  `AXI_ASSIGN_RESP_STRUCT(instr_slave_resp_o, axi_slave_resps[1])
+  /*
   // Break the AR combinational path between the (Snitch) icache AXI master
   // and the cluster_bus xbar. The AR spill register also cuts the ready path
   // back from the xbar to the icache.
@@ -111,6 +114,7 @@ module cluster_bus_wrap
     .mst_req_o  ( axi_slave_reqs[1]  ),
     .mst_resp_i ( axi_slave_resps[1] )
   );
+  */
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[2], dma_slave_req_i)
   `AXI_ASSIGN_RESP_STRUCT(dma_slave_resp_o, axi_slave_resps[2])
   `AXI_ASSIGN_REQ_STRUCT(axi_slave_reqs[3], ext_slave_req_i)

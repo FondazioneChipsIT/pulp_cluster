@@ -297,7 +297,7 @@ module dmac_wrap #(
 
   cluster_clock_gating idma_datapath_ckgate (
     .clk_i      ( clk_i              ),
-    .en_i       ( 1'b1               ),
+    .en_i       ( datapath_clk_en    ),
     .test_en_i  ( test_mode_i        ),
     .clk_o      ( datapath_clk_gated )
   );

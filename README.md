@@ -69,6 +69,18 @@ Warning: requires QuestaSim 2022.3 or newer.
 
    To use the GUI, add `gui=1` to the previous command.
 
+## Software Build-time Flags
+
+The pulp_cluster target ([`pulp-runtime/rules/pulpos/targets/pulp_cluster.mk`](pulp-runtime/rules/pulpos/targets/pulp_cluster.mk)) exposes the following Make variables to select hardware features when building the software with `make ... <flag>=1`:
+
+- `ARCHI_HMR`: enable when the cluster is built with the HMR (Hybrid Modular Redundancy) unit present (`Cfg.HMRPresent` in [`packages/pulp_cluster_package.sv`](packages/pulp_cluster_package.sv)). Adds `-DARCHI_HMR` and pulls in `kernel/hmr_synch.c`.
+- `SNITCH_ICACHE`: enable when the cluster is built with the Snitch instruction cache instead of the hierarchical one (`Cfg.SnitchICache` in [`packages/pulp_cluster_package.sv`](packages/pulp_cluster_package.sv)). Adds `-DSNITCH_ICACHE`, which skips the hierarchical icache control-register access in `kernel/cluster.c` (not present with the Snitch icache).
+
+Example:
+```
+make ... SNITCH_ICACHE=1
+```
+
 ## QuestaOne Simulation
 
 To simulate with the new QuestaOne flow, follow the previous steps up to the `make pulp-runtime` command, then:

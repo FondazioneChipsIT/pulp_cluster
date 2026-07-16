@@ -537,6 +537,7 @@ cluster_bus_wrap #(
   .AXI_ADDR_WIDTH         ( Cfg.AxiAddrWidth            ),
   .AXI_DATA_WIDTH         ( Cfg.AxiDataOutWidth         ),
   .AXI_USER_WIDTH         ( Cfg.AxiUserWidth            ),
+  .SNITCH_ICACHE          ( Cfg.SnitchICache            ),
   .AXI_ID_IN_WIDTH        ( AxiIdInWidth                ),
   .AXI_ID_OUT_WIDTH       ( AxiIdOutWidth               ),
   .BaseAddr               ( Cfg.ClusterBaseAddr         ),

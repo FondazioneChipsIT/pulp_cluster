@@ -3,6 +3,7 @@ work/
 modelsim.ini
 transcript
 scripts/compile.tcl
-regression_tests/
+regression_tests/*
+!regression_tests/play_bench/
 pulp-runtime/
 fault_injection_sim/

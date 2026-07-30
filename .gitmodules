@@ -1,0 +1,7 @@
+[submodule "regression_tests/play_bench/PLAY"]
+	path = regression_tests/play_bench/PLAY
+	url = https://github.com/FondazioneChipsIT/PLAY.git
+[submodule "regression_tests/play_bench/pulp-sdk"]
+	path = regression_tests/play_bench/pulp-sdk
+	url = https://github.com/FondazioneChipsIT/pulp-sdk.git
+	branch = pr/cluster-standalone-cv32e40p

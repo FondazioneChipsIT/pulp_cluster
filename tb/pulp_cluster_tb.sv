@@ -348,7 +348,7 @@ module pulp_cluster_tb;
     ClusterPeriphOffs: ClustPeriphOffs,
     ClusterExternalOffs: ClustExtOffs,
     EnableRemapAddress: 0,
-    SnitchICache: 1,
+    SnitchICache: 0,
     default: '0
   };
 

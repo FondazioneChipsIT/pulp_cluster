@@ -1,9 +1,17 @@
 .bender/
 work/
+venv/
 modelsim.ini
 transcript
 scripts/compile.tcl
 regression_tests/*
 !regression_tests/play_bench/
+regression_tests/play_bench/results/
 pulp-runtime/
 fault_injection_sim/
+
+# RTL sim artifacts written to the repo root by `make run` (vsim -c)
+sim.log
+FETCH_CORE_*.log
+trace_core_*.log
+vsim.wlf

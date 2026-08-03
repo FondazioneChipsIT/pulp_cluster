@@ -162,7 +162,9 @@ import rapid_recovery_pkg::*;
         .COREV_PULP            ( 1                           ), // For now this is a no
         .COREV_CLUSTER         ( 1                           ),
         .FPU                   ( FPU                         ),
-        .ZFINX                 ( 0                           ),
+        .FPU_ADDMUL_LAT        ( 1                           ),
+        .FPU_OTHERS_LAT        ( 1                           ),
+        .ZFINX                 ( 1                           ),
         .NUM_MHPMCOUNTERS      ( 29                          )
       ) CV32_CORE (
         .clk_i                 ( clk_i                       ),

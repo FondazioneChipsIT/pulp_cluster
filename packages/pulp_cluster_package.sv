@@ -267,9 +267,9 @@ package pulp_cluster_package;
     ClusterExternalOffs: 'h00400000,
     EnableRemapAddress: 0,
     SnitchICache: 0,
-    HciCutCores: 1,
-    HciCutIdma: 1,
-    HciCutExt: 1,
+    HciCutCores: 0,
+    HciCutIdma: 0,
+    HciCutExt: 0,
     default: '0
   };
 

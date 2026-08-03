@@ -29,7 +29,7 @@ dependencies:
   tech_cells_generic:     { git: "https://github.com/pulp-platform/tech_cells_generic.git",   version: 0.2.3 }
   flex-v:                 { git: "https://github.com/FondazioneChipsIT/flex-v.git",           rev: f22937733fd058550ef847ddbf1381e821f0f9d2 } # gl/fix_pkg_import
   riscv:                  { git: "https://github.com/AlSaqr-platform/riscv_nn.git",           rev: astral-v1.0 }
-  cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git",         rev: 65c6961d8acf9698e09c976228c43692d700e697 } # branch: ng/pulp_cluster
+  cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git",         rev: lb/PulpClusterCV32OHWFPU-divsqrt } # branch: lb/PulpClusterCV32OHWFPU-divsqrt (enables fpnew DIVSQRT, based on ng/pulp_cluster)
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git",                 rev: "pulpissimo-v6.1.2" }
   scm:                    { git: "https://github.com/pulp-platform/scm.git",                  rev: v1.2.0 }
   hci:                    { git: "https://github.com/pulp-platform/hci.git",                  version: =2.4.0 }

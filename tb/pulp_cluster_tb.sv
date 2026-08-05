@@ -349,6 +349,9 @@ module pulp_cluster_tb;
     ClusterExternalOffs: ClustExtOffs,
     EnableRemapAddress: 0,
     SnitchICache: 0,
+    HciCutCores: 0,
+    HciCutIdma: 0,
+    HciCutExt: 0,
     default: '0
   };
 

@@ -442,18 +442,24 @@ module pulp_cluster_tb;
     $display("[TB] Reading %s", binary);
     while (get_section(section_addr, section_len)) begin
       // Read Sections
-      automatic int num_words = (section_len + AxiWideBeWidth - 1)/AxiWideBeWidth;
+      automatic longint base_addr = (section_addr / AxiWideBeWidth) * AxiWideBeWidth;
+      automatic int lead = section_addr - base_addr;
+      automatic int num_words = (lead + section_len + AxiWideBeWidth - 1)/AxiWideBeWidth;
       $display("[TB] Reading section %x with %0d words", section_addr, num_words);
 
-      sections[section_addr >> AxiWideByteOffset] = num_words;
-      buffer                                      = new[num_words * AxiWideBeWidth];
+      sections[base_addr >> AxiWideByteOffset] = num_words;
+      buffer = new[num_words * AxiWideBeWidth];
       void'(read_section(section_addr, buffer, section_len));
       for (int i = 0; i < num_words; i++) begin
-        automatic logic [AxiWideBeWidth-1:0][7:0] word = '0;
+        automatic bit [31:0] word_idx = base_addr/AxiWideBeWidth + i;
+        automatic logic [AxiWideBeWidth-1:0][7:0] word = memory.exists(word_idx) ? memory[word_idx] : '0;
         for (int j = 0; j < AxiWideBeWidth; j++) begin
-          word[j] = buffer[i * AxiWideBeWidth + j];
+          automatic int byte_idx = i * AxiWideBeWidth + j - lead;
+          if (byte_idx >= 0 && byte_idx < section_len) begin
+            word[j] = buffer[byte_idx];
+          end
         end
-        memory[section_addr/AxiWideBeWidth + i] = word;
+        memory[word_idx] = word;
       end
     end
 

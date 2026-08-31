@@ -279,6 +279,55 @@ always_ff @(posedge clk, negedge rst_ni) begin
   end
 end
 
+   // The SH / PE / EXT paths have different, non-constant latencies (an HCI cut
+   // on the SH port adds pipeline stages), so the response of the youngest
+   // transaction can arrive before the one it must follow. None of the three
+   // paths can be back-pressured -- their r_valid is an unacknowledged pulse --
+   // so an early response must be captured here or it is lost forever.
+   // cv32e40p allows at most 2 outstanding transactions (trans_valid requires
+   // cnt_q < DEPTH, with cnt_q registered), hence no push can happen while
+   // num_outstanding == 2 and at most one response can ever be early: a single
+   // holding register is enough.
+   logic                    early_valid;
+   logic [DATA_WIDTH - 1:0] early_rdata;
+   logic                    early_opc;
+   logic                    early_valid_q;
+   logic [DATA_WIDTH - 1:0] early_rdata_q;
+   logic                    early_opc_q;
+
+   always_comb begin : _EARLY_RESPONSE_SELECT_
+      early_valid = 1'b0;
+      early_rdata = '0;
+      early_opc   = 1'b0;
+      // the youngest is arriving_order[0]; it is not the head only when two
+      // transactions towards different destinations are in flight
+      if ((num_outstanding == 2'd2) && (arriving_order[0] != arriving_order[1])) begin
+         case (arriving_order[0])
+            SH:  begin early_valid = data_r_valid_i_SH;  early_rdata = data_r_rdata_i_SH;  early_opc = 1'b0;              end
+            PE:  begin early_valid = s_data_r_valid_PE;  early_rdata = s_data_r_data_PE;   early_opc = s_data_r_opc_PE;   end
+            EXT: begin early_valid = data_r_valid_i_EXT; early_rdata = data_r_rdata_i_EXT; early_opc = data_r_opc_i_EXT;  end
+         endcase
+      end
+   end
+
+   always_ff @(posedge clk, negedge rst_ni) begin : _EARLY_RESPONSE_HOLD_
+      if (rst_ni == 1'b0) begin
+         early_valid_q <= 1'b0;
+         early_rdata_q <= '0;
+         early_opc_q   <= 1'b0;
+      end else if (early_valid) begin
+         early_valid_q <= 1'b1;
+         early_rdata_q <= early_rdata;
+         early_opc_q   <= early_opc;
+      end else if (early_valid_q && (num_outstanding == 2'd1)) begin
+         // same condition under which the held response is replayed below: it
+         // has just been delivered to the core, drop it. It must NOT be cleared
+         // when the older transaction retires (num_outstanding still 2), or the
+         // held response would be lost before its turn.
+         early_valid_q <= 1'b0;
+      end
+   end
+
 
 
 
@@ -496,7 +545,14 @@ end
    data_r_rdata_o = '0;
    data_r_opc_o   = 1'b0;
 
-   case (head)
+   if (early_valid_q && (num_outstanding == 2'd1)) begin
+      // the older transaction has already been served: the held response is
+      // now the head, replay it towards the core
+      data_r_valid_o = 1'b1;
+      data_r_rdata_o = early_rdata_q;
+      data_r_opc_o   = early_opc_q;
+   end
+   else case (head)
 
       SH: if (data_r_valid_i_SH) begin
          data_r_valid_o = 1;

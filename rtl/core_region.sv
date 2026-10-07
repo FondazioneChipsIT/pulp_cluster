@@ -165,7 +165,7 @@ import rapid_recovery_pkg::*;
         .FPU_ADDMUL_LAT        ( 1                           ),
         .FPU_OTHERS_LAT        ( 1                           ),
         .ZFINX                 ( 1                           ),
-        .NUM_MHPMCOUNTERS      ( 29                          )
+        .NUM_MHPMCOUNTERS      ( N_EXT_PERF_COUNTERS         )
       ) CV32_CORE (
         .clk_i                 ( clk_i                       ),
         .rst_ni                ( rst_ni                      ),

@@ -32,7 +32,7 @@ bwruntest = $(ROOT_DIR)/pulp-runtime/scripts/bwruntests.py
 REGRESSIONS := $(ROOT_DIR)/regression_tests
 
 VLOG_ARGS_LINT += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233 \"+incdir+$(shell pwd)/include\"
-VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233 -timescale \"1ns / 1ps\" \"+incdir+$(shell pwd)/include\"
+VLOG_ARGS += -suppress vlog-2583 -suppress vlog-13314 -suppress vlog-13233 -timescale \"1ps / 1ps\" \"+incdir+$(shell pwd)/include\"
 
 define generate_vsim
 	echo 'set ROOT [file normalize [file dirname [info script]]/$3]' > $1

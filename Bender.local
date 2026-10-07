@@ -13,7 +13,7 @@ overrides:
   register_interface:     { git: "https://github.com/pulp-platform/register_interface.git",   version: =0.4.7 }
   redmule:                { git: "https://github.com/pulp-platform/redmule.git",              version: =2.0.4 }
   common_cells:           { git: "https://github.com/FondazioneChipsIT/common_cells.git",     rev: 286ffd49d9ed3409ceaef7c7fe98516e2611a1a9 } # gl/fix_define
-  hci:                    { git: "https://github.com/pulp-platform/hci.git",                  version: =2.4.0 }
+  hci:                    { git: "https://github.com/pulp-platform/hci.git",                  rev: 8610980eb63ea2c74d83c5e2c20c0b5cabceb7ae}
   cv32e40p:               { git: "https://github.com/FondazioneChipsIT/cv32e40p.git",         rev: lb/PulpClusterCV32OHWFPU-divsqrt } # branch: lb/PulpClusterCV32OHWFPU-divsqrt (enables fpnew DIVSQRT, based on ng/pulp_cluster)
   redundancy_cells:       { git: "https://github.com/pulp-platform/redundancy_cells.git",     rev: 6ba6f41 } # yt/redmule-v2
   fpnew:                  { git: "https://github.com/pulp-platform/cvfpu.git",                rev: pulp-v0.1.3 }

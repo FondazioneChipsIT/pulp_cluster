@@ -14,7 +14,7 @@
 //              the virtual interfaces and starts the test passed by +UVM_TEST+
 //`define TEST_CLOCK_BYPASS
 
-`timescale 1ns/1ps
+`timescale 1ps/1ps
 
 `include "pulp_soc_defines.sv"
 `include "axi/assign.svh"
@@ -35,9 +35,16 @@ module pulp_cluster_tb;
   logic s_rstn;
   logic s_rstn_cl;
 
-  localparam time SYS_TCK  = 2ns;
-  localparam time SYS_TA   = 0.5ns;
-  localparam time SYS_TT   = SYS_TCK - 0.5ns;
+  // Clock period. NOTE: this file (and the whole compile) uses `timescale
+  // 1ps/1ps so the `time` type resolves to 1 ps units -- sub-ns periods and
+  // sample times are represented EXACTLY (with `timescale 1ns/1ps the `time`
+  // type rounds to whole ns, which silently pushed the AXI sample point onto
+  // the clock edge and caused intermittent gate-level L2-preload stalls).
+  localparam time SYS_TCK = 1330ps;      
+  // Apply AXI stimulus at the clock edge (TA=0), sample at mid-cycle
+  // (TT=SYS_TCK/2), well away from the clock edge -> robust in RTL and GLS.
+  localparam time SYS_TA  = 0ps;
+  localparam time SYS_TT  = SYS_TCK/2;   
 
   clk_rst_gen #(
     .ClkPeriod    ( SYS_TCK ),
@@ -147,6 +154,14 @@ module pulp_cluster_tb;
   `AXI_ASSIGN_TO_REQ(axi_memreq, axi_master[1])
   `AXI_ASSIGN_FROM_RESP(axi_master[1], axi_memrsp)
 
+  // Snoop signals for the L2 write-monitor, used to detect the SW-driven VCD
+  // dump start/stop markers (VCD_TRACE_START_VAL/VCD_TRACE_STOP_VAL written by
+  // matrixMul.c). We match on the data value, so the marker is recognized
+  // regardless of the exact address SW writes it to.
+  logic                s_vcd_mon_w_valid;
+  logic [AxiAw-1:0]     s_vcd_mon_w_addr;
+  logic [AxiDw-1:0]     s_vcd_mon_w_data;
+
   axi_sim_mem #(
     .AddrWidth ( AxiAw        ),
     .DataWidth ( AxiDw        ),
@@ -162,9 +177,9 @@ module pulp_cluster_tb;
      .rst_ni    ( s_rstn     ),
      .axi_req_i ( axi_memreq ),
      .axi_rsp_o ( axi_memrsp ),
-     .mon_w_valid_o     (),
-     .mon_w_addr_o      (),
-     .mon_w_data_o      (),
+     .mon_w_valid_o     ( s_vcd_mon_w_valid ),
+     .mon_w_addr_o      ( s_vcd_mon_w_addr  ),
+     .mon_w_data_o      ( s_vcd_mon_w_data  ),
      .mon_w_id_o        (),
      .mon_w_user_o      (),
      .mon_w_beat_count_o(),
@@ -596,14 +611,25 @@ module pulp_cluster_tb;
  **************/
 
 `ifdef VCD_DUMP
+  // Magic values written by SW to bracket the VCD-traced region (see
+  // VCD_TRACE_START_VAL/VCD_TRACE_STOP_VAL in matrixMul.c). Matched against
+  // either 32-bit half of the 64-bit AXI write data, since a 32-bit SW store
+  // can land in either lane depending on address alignment.
+  localparam logic [31:0] VcdTraceStartVal = 32'hBADCACA;
+  localparam logic [31:0] VcdTraceStopVal  = 32'hDEADCAFE;
+
+  function automatic bit vcd_marker_seen(logic [AxiDw-1:0] data, logic [31:0] val);
+    return (data[31:0] == val) || (data[63:32] == val);
+  endfunction
+
   initial begin: vcd_dump
     string vcd_dump_file;
 
     // Wait for the reset
     wait (s_rstn);
 
-    // Wait until the probe is high
-    while (!s_cluster_fetch_en)
+    // Wait for the SW-driven START marker write to L2.
+    while (!(s_vcd_mon_w_valid && vcd_marker_seen(s_vcd_mon_w_data, VcdTraceStartVal)))
       @(posedge s_clk);
 
      if ( $value$plusargs ("VCD_DUMP_FILE=%s", vcd_dump_file));
@@ -612,15 +638,21 @@ module pulp_cluster_tb;
     $dumpfile(vcd_dump_file);
     $dumpvars(0, cluster_i);
     $dumpon;
+    $display("[TB] VCD trace START marker seen @%0t", $time);
 
-    // Wait until the probe is low
-    while (s_cluster_fetch_en)
+    // Wait for the SW-driven STOP marker write to L2.
+    while (!(s_vcd_mon_w_valid && vcd_marker_seen(s_vcd_mon_w_data, VcdTraceStopVal)))
       @(posedge s_clk);
 
     $dumpoff;
+    $display("[TB] VCD trace STOP marker seen @%0t -- ending simulation", $time);
 
-    // Stop the execution
-    $finish(0);
+    // In the VCD/power flow we only care about the traced kernel region; there
+    // is no point continuing the (slow) gate-level run afterwards, so stop as
+    // soon as the dump is closed. This branch only exists when VCD_DUMP is
+    // defined (pulp_vcd=1); normal runs still finish via the s_cluster_eoc
+    // block (matrix_check + pass/fail reporting).
+    $finish;
   end: vcd_dump
 `endif
 

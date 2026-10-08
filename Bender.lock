@@ -105,14 +105,6 @@ packages:
       Git: https://github.com/pulp-platform/event_unit_flex.git
     dependencies:
     - common_cells
-  flex-v:
-    revision: f22937733fd058550ef847ddbf1381e821f0f9d2
-    version: null
-    source:
-      Git: https://github.com/FondazioneChipsIT/flex-v.git
-    dependencies:
-    - fpnew
-    - tech_cells_generic
   fpnew:
     revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
     version: null
@@ -128,9 +120,15 @@ packages:
       Git: https://github.com/pulp-platform/fpu_div_sqrt_mvp.git
     dependencies:
     - common_cells
+  gwt_sd2div:
+    revision: 3edce8621ea9f32d1ca50c366097b818fd9acb30
+    version: null
+    source:
+      Git: https://github.com/DevOps-SmartEyewear-Research/gwt_sd2div.git
+    dependencies: []
   hci:
-    revision: 7046da81d69154fa1de745068ee89499a5d3b16c
-    version: 2.4.0
+    revision: 8610980eb63ea2c74d83c5e2c20c0b5cabceb7ae
+    version: null
     source:
       Git: https://github.com/pulp-platform/hci.git
     dependencies:
@@ -268,12 +266,12 @@ packages:
     - common_cells
     - common_verification
   riscv:
-    revision: c760db14dbd6cc3ec3b8ae8274df2eac7225bcac
+    revision: 3c0966826dd5494dcc7ae63509c969e16987b19f
     version: null
     source:
-      Git: https://github.com/AlSaqr-platform/riscv_nn.git
+      Git: https://github.com/DevOps-SmartEyewear-Research/riscv_gwt.git
     dependencies:
-    - fpnew
+    - gwt_sd2div
     - tech_cells_generic
   scm:
     revision: 472f99affe44ff7b282b519c047a3cfeb35b16c6

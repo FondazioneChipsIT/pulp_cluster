@@ -163,7 +163,7 @@ import rapid_recovery_pkg::*;
         .COREV_CLUSTER         ( 1                           ),
         .FPU                   ( FPU                         ),
         .FPU_ADDMUL_LAT        ( 1                           ),
-        .FPU_OTHERS_LAT        ( 1                           ),
+        .FPU_OTHERS_LAT        ( 2                           ),
         .ZFINX                 ( 1                           ),
         .NUM_MHPMCOUNTERS      ( N_EXT_PERF_COUNTERS         )
       ) CV32_CORE (
@@ -208,6 +208,16 @@ import rapid_recovery_pkg::*;
       assign core_busy_o = ~core_sleep;
     end else if ( CORE_TYPE_CL == 1 ) begin: RI5CY_CORE
       assign boot_addr = boot_addr_i;
+
+`ifdef TARGET_CORE_GWT
+      // The GWT RI5CY variant (riscv_gwt) exposes the APU through the
+      // riscv_apu_unit_apu_if SystemVerilog interface instead of the flat
+      // apu_master_* ports used by the other cores. Instantiate the interface
+      // here and bridge it to the flat cluster-side APU ports below so the
+      // rest of core_region / pulp_cluster keeps a uniform port list.
+      riscv_apu_unit_apu_if apu_gwt ();
+`endif
+
       riscv_core #(
         .INSTR_RDATA_WIDTH   ( INSTR_RDATA_WIDTH           ),
         .PULP_CLUSTER        ( 1                           ),
@@ -222,9 +232,9 @@ import rapid_recovery_pkg::*;
       ) RI5CY_CORE             (
         .clk_i                 ( clk_i                       ),
         .rst_ni                ( rst_ni                      ),
-        .setback_i             ( setback_i                   ),
+        //.setback_i             ( setback_i                   ),
         .clock_en_i            ( clock_en_i                  ),
-        .test_en_i             ( test_mode_i                 ),
+        //.test_en_i             ( test_mode_i                 ),
         // Control Interface
         .fregfile_disable_i    ( '1                          ),
         .boot_addr_i           ( boot_addr                   ),
@@ -245,9 +255,11 @@ import rapid_recovery_pkg::*;
         .data_addr_o           ( core_data_req_o.add         ),
         .data_wdata_o          ( core_data_req_o.data        ),
         .data_rdata_i          ( core_data_rsp_i.r_data      ),
+`ifndef TARGET_CORE_GWT    
         .data_unaligned_o      (         /* Unused */        ),
         // apu-interconnect
         // Handshake
+    
         .apu_master_req_o      ( apu_master_req_o            ),
         .apu_master_ready_o    ( apu_master_ready_o          ),
         .apu_master_gnt_i      ( apu_master_gnt_i            ),
@@ -259,25 +271,55 @@ import rapid_recovery_pkg::*;
         // Response Bus
         .apu_master_valid_i    ( apu_master_valid_i          ),
         .apu_master_result_i   ( apu_master_result_i         ),
-        .apu_master_flags_i    ( apu_master_flags_i          ),
+        .apu_master_flags_i    ( apu_master_flags_i          ), 
+`else  
+        .apu (apu_gwt.master),
+`endif  
         // IRQ Interface
         .irq_i                 ( irq_req_i                   ),
         .irq_id_i              ( irq_id_i                    ),
+`ifdef TARGET_CORE_GWT
+        // riscv_gwt (e47ddb9) exposes a CLINT-style interrupt interface (no
+        // irq_i/irq_id_i) plus extra ports absent in RI5CY/flex-v. Interrupts
+        // are tied off and the extra outputs left dangling for this build.
+        .irq_software_i        (1'b0),
+        .irq_timer_i           (1'b0),
+        .irq_external_i        (1'b0),
+        .irq_fast_i            (15'b0),
+        .irq_nmi_i             (1'b0),
+        .irq_fastx_i           (32'b0),
+        .irq_privilege_i       (1'b1),   // M-mode: avoid floating -> X in int_controller
+        // XIP is absent in this cluster: tie off, otherwise the floating input
+        // propagates X into lsu_err_i / is_fetch_failed_i and corrupts the RF
+        // write-enable (branch_decision=X symptom).
+        .xip_fault_i           (2'b0),
+        // No i$ flush controller here: grant immediately so a flush request
+        // cannot deadlock the controller (gnt floating -> X -> hang).
+        .instr_cache_flush_gnt_i ( 1'b1 ),
+        .data_atop_o           (),
+`else
+       
+        .irq_sec_i             ( '0                          ),
+`endif        
         .irq_ack_o             ( irq_ack_o                   ),
         .irq_id_o              ( irq_ack_id_o                ),
-        .irq_sec_i             ( '0                          ),
+
         .sec_lvl_o             (                             ),
         // Debug Interface
         .debug_req_i           ( debug_req_i |
                                  recovery_bus_i.debug_req    ),
+`ifndef TARGET_CORE_GWT                                 
         .debug_resume_i        ( recovery_bus_i.debug_resume ),
         .debug_mode_o          ( debug_halted_o              ),
+`endif
         // Yet other control signals
         .fetch_enable_i        ( fetch_en_i                  ),
         .core_busy_o           ( core_busy_o                 ),
         // External performance monitoring signals
-        .ext_perf_counters_i   ( ext_perf_i                  ),
+        .ext_perf_counters_i   ( ext_perf_i                  )
         // RF recovery ports
+`ifndef TARGET_CORE_GWT 
+        ,        
         .recover_i         ( recovery_bus_i.rf_recovery_en            ),
         // Write port A
         .regfile_waddr_a_i ( recovery_bus_i.rf_recovery_wdata.waddr_a ),
@@ -318,7 +360,123 @@ import rapid_recovery_pkg::*;
         .recovery_mscratch_i ( recovery_bus_i.csr_recovery.csr_mscratch ),
         .recovery_mepc_i     ( recovery_bus_i.csr_recovery.csr_mepc     ),
         .recovery_mcause_i   ( recovery_bus_i.csr_recovery.csr_mcause   )
+`endif
       );
+`ifdef TARGET_CORE_GWT
+      // ---------------------------------------------------------------------
+      // Private FPU attached as the APU slave on the apu_gwt interface.
+      //
+      // The GWT RI5CY core has no internal FPU: it dispatches FP ops over the
+      // riscv_apu_unit_apu_if interface (apu_gwt) and expects the results back
+      // on the same interface. We instantiate a per-core fpnew_top here as the
+      // APU slave, replicating the configuration that the non-GWT RI5CY built
+      // internally in its ex_stage (adapted to the constants available in this
+      // checkout's riscv_defines; XF8ALT/DOTP slots are tied off / disabled).
+      //
+      // Command/flag/operand packing mirrors the legacy core:
+      //   cmd_operation_id = {vec_op, op_mod, fpu_op}
+      //   cmd_flag         = {int_fmt, src_fmt, dst_fmt, rnd_mode}
+      // The cmd_transaction_id is carried through fpnew's tag so the core's
+      // apu_unit can match the response to its in-flight slot.
+      // ---------------------------------------------------------------------
+      localparam fpnew_pkg::fpu_features_t FpuFeatures = '{
+        Width:         riscv_defines::C_FLEN,
+        EnableVectors: riscv_defines::C_XFVEC,
+        EnableNanBox:  1'b0,
+        FpFmtMask:     {riscv_defines::C_RVF, riscv_defines::C_RVD, riscv_defines::C_XF16,
+                        riscv_defines::C_XF8, riscv_defines::C_XF16ALT, 1'b0},
+        IntFmtMask:    {riscv_defines::C_XFVEC && riscv_defines::C_XF8,
+                        riscv_defines::C_XFVEC && (riscv_defines::C_XF16 || riscv_defines::C_XF16ALT),
+                        1'b1, 1'b0}
+      };
+
+      localparam fpnew_pkg::unit_type_t FpuDivType =
+        (FP_DIVSQRT != 0) ? fpnew_pkg::MERGED : fpnew_pkg::DISABLED;
+
+      // The GWT apu_unit is a registered interface: it documents that "the apu
+      // interface is at least a one-cycle operation" and frees an in-flight
+      // slot only when the response does NOT collide with a same-cycle send
+      // (inflight_returning & !inflight_sending). A purely combinational FPU
+      // (0 pipe regs) returns the result in the same cycle as the command, so
+      // the slot is never freed and read_dep/write_dep lock up. Hence every
+      // compute op-group needs at least one pipe register.
+      localparam int unsigned FpuPipeLat = 1;
+
+      localparam fpnew_pkg::fpu_implementation_t FpuImpl = '{
+        PipeRegs:   '{'{FpuPipeLat, FpuPipeLat, FpuPipeLat,
+                        FpuPipeLat, FpuPipeLat, FpuPipeLat},   // ADDMUL
+                      '{default: FpuPipeLat},                  // DIVSQRT (plus iterative latency)
+                      '{default: FpuPipeLat},                  // NONCOMP
+                      '{default: FpuPipeLat},                  // CONV
+                      '{default: 32'd0}},                      // SDOTP (disabled)
+        UnitTypes:  '{'{default: fpnew_pkg::MERGED},    // ADDMUL
+                      '{default: FpuDivType},           // DIVSQRT
+                      '{default: fpnew_pkg::PARALLEL},  // NONCOMP
+                      '{default: fpnew_pkg::MERGED},    // CONV
+                      '{default: fpnew_pkg::DISABLED}}, // SDOTP
+        PipeConfig: fpnew_pkg::AFTER
+      };
+
+      // APU command decode (same field layout as the legacy ex_stage FPU)
+      logic                                  fpu_vec_op;
+      logic                                  fpu_op_mod;
+      logic [fpnew_pkg::OP_BITS-1:0]         fpu_op;
+      logic [fpnew_pkg::FP_FORMAT_BITS-1:0]  fpu_src_fmt;
+      logic [fpnew_pkg::FP_FORMAT_BITS-1:0]  fpu_dst_fmt;
+      logic [fpnew_pkg::INT_FORMAT_BITS-1:0] fpu_int_fmt;
+      logic [riscv_defines::C_RM-1:0]        fp_rnd_mode;
+
+      assign {fpu_vec_op, fpu_op_mod, fpu_op}                   = apu_gwt.cmd_operation_id;
+      assign {fpu_int_fmt, fpu_src_fmt, fpu_dst_fmt, fp_rnd_mode} = apu_gwt.cmd_flag;
+
+      // APU response
+      logic [riscv_defines::C_FLEN-1:0] fpu_result;
+      fpnew_pkg::status_t               fpu_status;
+      logic                             fpu_tag;
+
+      fpnew_top #(
+        .Features       ( FpuFeatures ),
+        .Implementation ( FpuImpl     ),
+        .TagType        ( logic       )
+      ) i_fpnew_private (
+        .clk_i          ( clk_i                                      ),
+        .rst_ni         ( rst_ni                                     ),
+        .hart_id_i      ( hart_id                                    ),
+        .operands_i     ( apu_gwt.cmd_operands[2:0]                  ),
+        .rnd_mode_i     ( fpnew_pkg::roundmode_e'(fp_rnd_mode)       ),
+        .op_i           ( fpnew_pkg::operation_e'(fpu_op)            ),
+        .op_mod_i       ( fpu_op_mod                                 ),
+        .src_fmt_i      ( fpnew_pkg::fp_format_e'(fpu_src_fmt)       ),
+        .dst_fmt_i      ( fpnew_pkg::fp_format_e'(fpu_dst_fmt)       ),
+        .int_fmt_i      ( fpnew_pkg::int_format_e'(fpu_int_fmt)      ),
+        .vectorial_op_i ( fpu_vec_op                                 ),
+        .tag_i          ( apu_gwt.cmd_transaction_id                 ),
+        .simd_mask_i    ( '1                                         ),
+        .in_valid_i     ( apu_gwt.cmd_valid                          ),
+        .in_ready_o     ( apu_gwt.cmd_ready                          ),
+        .flush_i        ( 1'b0                                       ),
+        .result_o       ( fpu_result                                ),
+        .status_o       ( fpu_status                                ),
+        .tag_o          ( fpu_tag                                    ),
+        .out_valid_o    ( apu_gwt.rsp_valid                          ),
+        .out_ready_i    ( apu_gwt.rsp_ready                          ),
+        .busy_o         ( /* unused */                               )
+      );
+
+      // Drive the APU response channel back to the core (slave side)
+      assign apu_gwt.rsp_result         = {{(32){1'b0}}, fpu_result};
+      assign apu_gwt.rsp_flag           = fpu_status;
+      assign apu_gwt.rsp_transaction_id = fpu_tag;
+
+      // The flat apu_master_* ports are unused in this build (FPU is local):
+      // tie off the outputs so nothing floats at the cluster boundary.
+      assign apu_master_req_o      = 1'b0;
+      assign apu_master_ready_o    = 1'b0;
+      assign apu_master_type_o     = '0;
+      assign apu_master_operands_o = '0;
+      assign apu_master_op_o       = '0;
+      assign apu_master_flags_o    = '0;
+`endif
       assign debug_havereset_o = '0;
       assign debug_running_o   = '0;
       assign csr_backup_o.csr_mie = '0;

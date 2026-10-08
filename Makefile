@@ -154,11 +154,11 @@ compile: $(library)
 	$(VSIM) -c -do 'quit -code [source scripts/compile.tcl]'
 
 build_qone: compile
-	$(QOPT) $(compile_flag) -debug +designfile -suppress 3053 -suppress 8885 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized
+	$(QOPT) $(compile_flag) -debug +designfile -suppress 3053 -suppress 8885 -suppress 2732 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized
 
 
 build: generate_idma_rtl compile
-	$(VOPT) $(compile_flag) -suppress 3053 -suppress 8885 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized +acc
+	$(VOPT) $(compile_flag) -suppress 3053 -suppress 8885 -suppress 2732 -work $(library)  $(top_level)_tb -o $(top_level)_tb_optimized +acc
 
 compile_lint: $(library)
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }

@@ -305,7 +305,7 @@ module pulp_cluster_tb;
       );
 
   localparam pulp_cluster_cfg_t PulpClusterCfg = '{
-    CoreType: pulp_cluster_package::CV32,
+    CoreType: pulp_cluster_package::RI5CY,
     NumCores: `NB_CORES,
     DmaNumPlugs: `NB_DMAS,
     DmaNumOutstandingBursts: 8,
@@ -318,7 +318,7 @@ module pulp_cluster_tb;
     UseHci: 1,
     TcdmSize: 256*1024,
     TcdmNumBank: 16,
-    HwpePresent: 1,
+    HwpePresent: 0,
     HwpeCfg: '{NumHwpes: 3, HwpeList: {SOFTEX, NEUREKA, REDMULE}},
     HwpeNumPorts: 9,
     HMRPresent: 1,
@@ -331,8 +331,8 @@ module pulp_cluster_tb;
     HMRSeparateDataVoters: 1,
     HMRSeparateAxiBus: 0,
     HMRNumBusVoters: 1,
-    EnableECC: 1,
-    ECCInterco: 1,
+    EnableECC: 0,
+    ECCInterco: 0,
     iCacheNumBanks: 2,
     iCacheNumLines: 1,
     iCacheNumWays: 4,

@@ -9,6 +9,7 @@ common_defs += -D ICAHE_USE_FF
 bender_defs += -D TRACE_EXECUTION
 common_defs += -D CLUSTER_ALIAS
 common_defs += -D USE_PULP_PARAMETERS
+common_defs += -D TARGET_CORE_GWT
 
 common_targs += -t rtl
 common_targs += -t cluster_standalone

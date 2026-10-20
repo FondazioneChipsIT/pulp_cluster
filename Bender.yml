@@ -17,7 +17,6 @@ dependencies:
   per2axi:                { git: "https://github.com/pulp-platform/per2axi.git",              version: =1.0.5      }
   cluster_interconnect:   { git: "https://github.com/pulp-platform/cluster_interconnect.git", version: =1.3.0      }
   event_unit_flex:        { git: "https://github.com/pulp-platform/event_unit_flex.git",      rev: astral-v1.0 }
-  mchan:                  { git: "https://github.com/pulp-platform/mchan.git", version: =1.2.4 }
   idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: ChipsIt-v0.0.0 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
   hier-icache:            { git: "https://github.com/pulp-platform/hier-icache.git", version: =1.3.0 }
@@ -54,9 +53,6 @@ sources:
   - rtl/cluster_event_map.sv
   - rtl/cluster_timer_wrap.sv
   - rtl/obi_pulp_adapter.sv
-  - target: mchan
-    files:
-      - rtl/mchan_wrap.sv
   - target: idma
     files:
       - rtl/idma_wrap.sv

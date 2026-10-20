@@ -739,24 +739,14 @@ dmac_wrap #(
   .BE_WIDTH           ( BeWidth                     ),
   .axi_req_t          ( c2s_in_int_req_t            ),
   .axi_resp_t         ( c2s_in_int_resp_t           ),
-`ifdef TARGET_MCHAN
-  .NB_CTRLS           ( Cfg.NumCores + 2            ),
-  .MCHAN_BURST_LENGTH ( 8 * (1 << Cfg.DmaBurstLength) ),
-  .TCDM_ADD_WIDTH     ( TcdmAddrWidth               )
-`else
   .NB_PE_PORTS        ( 2                           ),
   .NUM_BIDIR_STREAMS  ( 1                           ),
   .GLOBAL_QUEUE_DEPTH ( 8                           ),
   .MUX_READ           ( 1'b1                        ),
   .TCDM_MEM2BANKS     ( 1                           ),
   .IDMA_BURST_LENGTH  ( Cfg.DmaBurstLength          )
-`endif
 ) dmac_wrap_i     (
-`ifdef TARGET_IDMA
   .clk_i              ( idma_clk_gated                   ),
-`else
-  .clk_i              ( clk_i                            ),
-`endif
   .rst_ni             ( rst_ni                           ),
   .test_mode_i        ( test_mode_i                      ),
   .pe_ctrl_slave      ( s_periph_dma_bus[1:0]            ),

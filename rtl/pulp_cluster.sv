@@ -713,7 +713,6 @@ cluster_interconnect_wrap #(
 // clock in the idma wrapper
 //*****************************************************
 
-`ifdef TARGET_IDMA
 logic idma_clk_gated;
 cluster_clock_gating idma_ctrl_ckgate (
     .clk_i      ( clk_i          ),
@@ -721,7 +720,6 @@ cluster_clock_gating idma_ctrl_ckgate (
     .test_en_i  ( test_mode_i    ),
     .clk_o      ( idma_clk_gated )
   );
-`endif
 
 //***************************************************
 //*********************DMAC WRAP*********************

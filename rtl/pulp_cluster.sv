@@ -724,7 +724,7 @@ cluster_clock_gating idma_ctrl_ckgate (
 //***************************************************
 //*********************DMAC WRAP*********************
 //***************************************************
-dmac_wrap #(
+idma_inst32_top #(
   .NB_CORES           ( Cfg.NumCores                ),
   .NB_OUTSND_BURSTS   ( Cfg.DmaNumOutstandingBursts ),
   .AXI_ADDR_WIDTH     ( Cfg.AxiAddrWidth            ),

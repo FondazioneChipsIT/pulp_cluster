@@ -55,12 +55,9 @@
 `define NB_MPERIPHS   1
 `define NB_SPERIPHS   12
 
-`ifdef TARGET_MCHAN
-  `define NB_DMAS       4
-  `define DMA_USE_HWPE_PORT 0
-`else
-  `define NB_DMAS       2
-  `define DMA_USE_HWPE_PORT 1
+`define NB_DMAS       2
+`define DMA_USE_HWPE_PORT 1
+
 // Width of byte enable for a given data width
 `define EVAL_BE_WIDTH(DATAWIDTH) (DATAWIDTH/8)
 

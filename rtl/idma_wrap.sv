@@ -744,7 +744,8 @@ module dmac_wrap #(
         .MaskInvalidData     (1'b0),
         .HardwareLegalizer   (1'b1),
         .RejectZeroTransfers (1'b1),
-        .ErrorHandling       (1'b0)
+        .ErrorHandling       (1'b0),
+        .Burst_len           ( IDMA_BURST_LENGTH )
       ) i_idma_backend_r_axi_rw_init_rw_obi (
         .clk_i              ( datapath_clk_gated                      ),
         .rst_ni             ( rst_ni                                  ),

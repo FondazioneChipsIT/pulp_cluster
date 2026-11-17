@@ -18,15 +18,15 @@ dependencies:
   cluster_interconnect:   { git: "https://github.com/pulp-platform/cluster_interconnect.git", rev: v1.3.0      }
   event_unit_flex:        { git: "https://github.com/pulp-platform/event_unit_flex.git",      rev: astral-v1.0 }
   mchan:                  { git: "https://github.com/pulp-platform/mchan.git", version: =1.2.4 }
-  idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: cdc5e559ada78b6b463458dfee7fef028e7af4b5 }
+  idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: 7bde65988c0796bde0d9181fcb4b53e84ee80a93 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
   hier-icache:            { git: "https://github.com/pulp-platform/hier-icache.git", version: =1.3.0 }
   cluster_icache:         { git: "https://github.com/pulp-platform/cluster_icache.git", version: =0.2.0 }
   cluster_peripherals:    { git: "https://github.com/pulp-platform/cluster_peripherals.git", rev: 072ddd876c88324ef28856d4b2697424aaa231ce }
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: =0.39.8  }
   timer_unit:             { git: "https://github.com/pulp-platform/timer_unit.git", version: =1.0.3 }
-  common_cells:           { git: "https://github.com/pulp-platform/common_cells.git", version: =1.38.0 }
-  tech_cells_generic:     { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: =0.2.3 }
+  common_cells:           { git: "https://github.com/FondazioneChipsIT/common_cells.git", rev: b9aae0ea5701b104fefecda36ed3b89eda04c2f8 }
+  tech_cells_generic:     { git: "https://github.com/pulp-platform/tech_cells_generic.git", rev: 55cb54513e2d426be5992d311cb9d5dbcad10c78 }
   flex-v:                 { git: "https://github.com/pulp-platform/flex-v.git", rev: astral-v1.1 }
   cv32e40p:               { git: "https://github.com/pulp-platform/cv32e40p.git", rev: astral-v1.0 }
   ibex:                   { git: "https://github.com/pulp-platform/ibex.git", rev: "pulpissimo-v6.1.2" }

@@ -69,10 +69,10 @@ packages:
     dependencies:
     - hci
   common_cells:
-    revision: 9afda9abb565971649c2aa0985639c096f351171
-    version: 1.38.0
+    revision: b9aae0ea5701b104fefecda36ed3b89eda04c2f8
+    version: null
     source:
-      Git: https://github.com/pulp-platform/common_cells.git
+      Git: https://github.com/FondazioneChipsIT/common_cells.git
     dependencies:
     - common_verification
     - tech_cells_generic
@@ -179,10 +179,10 @@ packages:
       Git: https://github.com/pulp-platform/icache-intc.git
     dependencies: []
   idma:
-    revision: cdc5e559ada78b6b463458dfee7fef028e7af4b5
+    revision: 7bde65988c0796bde0d9181fcb4b53e84ee80a93
     version: null
     source:
-      Git: https://github.com/pulp-platform/iDMA.git
+      Git: https://github.com/FondazioneChipsIT/iDMA.git
     dependencies:
     - axi
     - axi_stream
@@ -286,8 +286,8 @@ packages:
     - hwpe-stream
     - ibex
   tech_cells_generic:
-    revision: 7968dd6e6180df2c644636bc6d2908a49f2190cf
-    version: 0.2.13
+    revision: 55cb54513e2d426be5992d311cb9d5dbcad10c78
+    version: null
     source:
       Git: https://github.com/pulp-platform/tech_cells_generic.git
     dependencies:

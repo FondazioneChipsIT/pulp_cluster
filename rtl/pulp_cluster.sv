@@ -94,7 +94,8 @@ module pulp_cluster
   localparam int unsigned PeRoutingLsb = 10,
   // FPU bus parameters
   localparam int unsigned FpuNumArgs = 3,
-  localparam int unsigned FpuOpCodeWidth = 6,
+  // APU op-code = {vectorial_op, op_mod, fpnew op}: must track fpnew_pkg::OP_BITS (5 in cvfpu pulp-v0.1.x)
+  localparam int unsigned FpuOpCodeWidth = 2 + fpnew_pkg::OP_BITS,
   localparam int unsigned FpuTypeWidth = 3,
   localparam int unsigned FpuInFlagsWidth = 15,
   localparam int unsigned FpuOutFlagsWidth = 5,

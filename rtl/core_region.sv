@@ -209,19 +209,33 @@ import rapid_recovery_pkg::*;
     end else if ( CORE_TYPE_CL == 1 ) begin: RI5CY_CORE
       assign boot_addr = boot_addr_i;
 
+      // The core packs the APU op-code as {vectorial_op, op_mod, fpnew op}. If the
+      // width does not match fpnew_pkg::OP_BITS the vectorial bit is truncated and
+      // every packed FP op silently executes as scalar (upper lanes NaN-boxed).
+      if (FPU && (APU_WOP_CPU != 2 + fpnew_pkg::OP_BITS)) begin: gen_apu_wop_check
+        $fatal(1, "APU_WOP_CPU (%0d) must be 2 + fpnew_pkg::OP_BITS (%0d)",
+               APU_WOP_CPU, 2 + fpnew_pkg::OP_BITS);
+      end
+
 `ifdef TARGET_CORE_GWT
       // The GWT RI5CY variant (riscv_gwt) exposes the APU through the
       // riscv_apu_unit_apu_if SystemVerilog interface instead of the flat
       // apu_master_* ports used by the other cores. Instantiate the interface
       // here and bridge it to the flat cluster-side APU ports below so the
       // rest of core_region / pulp_cluster keeps a uniform port list.
-      riscv_apu_unit_apu_if apu_gwt ();
+      riscv_apu_unit_apu_if #(
+        .CMD_OPERATION_ID_WIDTH ( APU_WOP_CPU )
+      ) apu_gwt ();
 `endif
 
       riscv_core #(
         .INSTR_RDATA_WIDTH   ( INSTR_RDATA_WIDTH           ),
         .PULP_CLUSTER        ( 1                           ),
         .FPU                 ( FPU                         ),
+        .APU_WOP_CPU         ( APU_WOP_CPU                 ),
+`ifdef TARGET_CORE_GWT
+        .CMD_OPERATION_ID_WIDTH ( APU_WOP_CPU               ),
+`endif
         .FP_DIVSQRT          ( FP_DIVSQRT                  ),
         .SHARED_FP           ( 0                           ),
         .SHARED_FP_DIVSQRT   ( 0                           ),

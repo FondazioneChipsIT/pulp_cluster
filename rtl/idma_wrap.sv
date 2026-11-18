@@ -13,6 +13,7 @@
 
 `include "axi/assign.svh"
 `include "axi/typedef.svh"
+`include "apb/typedef.svh"
 `include "obi/typedef.svh"
 `include "idma/typedef.svh"
 `include "register_interface/typedef.svh"
@@ -228,6 +229,13 @@ module dmac_wrap #(
   dma_regs_req_t [NumRegs-1:0] dma_regs_req;
   dma_regs_rsp_t [NumRegs-1:0] dma_regs_rsp;
 
+  // APB Response and Request definitions
+  `APB_TYPEDEF_REQ_T(apb_req_t, logic[RegAddrWidth-1:0], logic[DATA_WIDTH-1:0], logic[BE_WIDTH-1:0])
+  `APB_TYPEDEF_RESP_T(apb_rsp_t, logic[DATA_WIDTH-1:0])
+
+  apb_req_t [NumRegs-1:0] dma_apb_req;
+  apb_rsp_t [NumRegs-1:0] dma_apb_rsp;
+
   // iDMA struct definitions
   localparam int unsigned TFLenWidth = AXI_ADDR_WIDTH;
   localparam int unsigned NumDim = 32'd3;  // Support 2D midend for 2D transfers
@@ -340,24 +348,38 @@ module dmac_wrap #(
       .reg_req_o(dma_regs_req[i]),
       .reg_rsp_i(dma_regs_rsp[i])
     );
+
+    reg_to_apb #(
+      .reg_req_t ( dma_regs_req_t ),
+      .reg_rsp_t ( dma_regs_rsp_t ),
+      .apb_req_t ( apb_req_t  ),
+      .apb_rsp_t ( apb_rsp_t )
+    ) i_reg_to_apb (
+      .clk_i ( clk_i ),
+      .rst_ni ( rst_ni ),
+      .reg_req_i ( dma_regs_req[i] ),
+      .reg_rsp_o ( dma_regs_rsp[i] ),
+      .apb_req_o ( dma_apb_req[i]  ),
+      .apb_rsp_i ( dma_apb_rsp[i]  )
+    );
   end
 
   idma_reg32_3d #(
     .NumRegs       (NumRegs),
     .NumStreams    (NumStreams),
     .IdCounterWidth(32'd32),
-    .reg_req_t     (dma_regs_req_t),
-    .reg_rsp_t     (dma_regs_rsp_t),
+    .apb_req_t     ( apb_req_t ),
+    .apb_rsp_t     ( apb_rsp_t ),
     .dma_req_t     (idma_nd_req_t)
   ) i_idma_reg32_3d (
     .clk_i         ( clk_i ),
     .rst_ni,
-    .dma_ctrl_req_i(dma_regs_req),
-    .dma_ctrl_rsp_o(dma_regs_rsp),
+    .dma_ctrl_req_i(dma_apb_req),
+    .dma_ctrl_rsp_o(dma_apb_rsp),
     .dma_req_o     (twod_req),
     .req_valid_o   (one_fe_valid),
     .req_ready_i   (fe_ready[stream_idx]),
-    .next_id_i     (next_id[stream_idx]),
+    .next_id_i     (next_id),
     .stream_idx_o  (stream_idx),
     .done_id_i     (done_id),
     .busy_i        (idma_busy),
@@ -520,7 +542,6 @@ module dmac_wrap #(
       ) i_idma_backend_r_obi_rw_init_w_axi (
         .clk_i              ( datapath_clk_gated                               ),
         .rst_ni             ( rst_ni                                  ),
-        .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
         .req_ready_o        ( be_ready[s]                             ),
         .req_length_i       ( idma_req[s].length                      ),
@@ -749,7 +770,6 @@ module dmac_wrap #(
       ) i_idma_backend_r_axi_rw_init_rw_obi (
         .clk_i              ( datapath_clk_gated                               ),
         .rst_ni             ( rst_ni                                  ),
-        .test_i             ( test_mode_i                             ),
         .req_valid_i        ( be_valid[s]                             ),
         .req_ready_o        ( be_ready[s]                             ),
         .req_length_i       ( idma_req[s].length                      ),

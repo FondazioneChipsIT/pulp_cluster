@@ -14,15 +14,16 @@ package:
 dependencies:
   axi2mem:                { git: "https://github.com/pulp-platform/axi2mem.git",              rev: v1.0.2      }
   axi2per:                { git: "https://github.com/pulp-platform/axi2per.git",              rev: v1.0.2      }
+  apb:                    { git: "https://github.com/pulp-platform/apb.git",                  version: =0.2.4  }
   per2axi:                { git: "https://github.com/pulp-platform/per2axi.git",              rev: v1.0.5      }
   cluster_interconnect:   { git: "https://github.com/pulp-platform/cluster_interconnect.git", rev: v1.3.0      }
   event_unit_flex:        { git: "https://github.com/pulp-platform/event_unit_flex.git",      rev: astral-v1.0 }
   mchan:                  { git: "https://github.com/pulp-platform/mchan.git", version: =1.2.4 }
-  idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: 7bde65988c0796bde0d9181fcb4b53e84ee80a93 }
+  idma:                   { git: "https://github.com/FondazioneChipsIT/iDMA.git", rev: e4aa77f4c69972242b4776ae54a9aa0daa3a49e1 }
   obi:                    { git: "https://github.com/pulp-platform/obi.git", version: =0.1.7 }
   hier-icache:            { git: "https://github.com/pulp-platform/hier-icache.git", version: =1.3.0 }
   cluster_icache:         { git: "https://github.com/pulp-platform/cluster_icache.git", version: =0.2.0 }
-  cluster_peripherals:    { git: "https://github.com/pulp-platform/cluster_peripherals.git", rev: 072ddd876c88324ef28856d4b2697424aaa231ce }
+  cluster_peripherals:    { git: "https://github.com/FondazioneChipsIT/cluster_peripherals.git", rev: da4d88f0d9325b7a713243dacd46abd5cb37c2de }
   axi:                    { git: "https://github.com/pulp-platform/axi.git", version: =0.39.8  }
   timer_unit:             { git: "https://github.com/pulp-platform/timer_unit.git", version: =1.0.3 }
   common_cells:           { git: "https://github.com/FondazioneChipsIT/common_cells.git", rev: b9aae0ea5701b104fefecda36ed3b89eda04c2f8 }

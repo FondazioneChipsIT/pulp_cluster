@@ -184,6 +184,7 @@ packages:
     source:
       Git: https://github.com/FondazioneChipsIT/iDMA.git
     dependencies:
+    - apb
     - axi
     - axi_stream
     - common_cells

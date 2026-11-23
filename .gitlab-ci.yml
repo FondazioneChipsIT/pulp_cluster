@@ -11,12 +11,16 @@ stages:
 
 init:
   stage: nonfree
+  only:
+    - merge_requests
   script: make nonfree-init
   artifacts:
     paths: [ nonfree/.gitlab-ci.yml ]
 
 subpipe:
   stage: nonfree
+  only:
+    - merge_requests
   needs: [ init ]
   variables:
     PARENT_PIPELINE_SOURCE: $CI_PIPELINE_SOURCE

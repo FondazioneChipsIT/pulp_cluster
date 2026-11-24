@@ -69,7 +69,7 @@ packages:
     dependencies:
     - hci
   common_cells:
-    revision: b9aae0ea5701b104fefecda36ed3b89eda04c2f8
+    revision: 90c5129f022ed573fa706b45939f866b8d441040
     version: null
     source:
       Git: https://github.com/FondazioneChipsIT/common_cells.git
